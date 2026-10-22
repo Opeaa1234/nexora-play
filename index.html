@@ -31,7 +31,7 @@
   <article class="game" data-name="cosmic blocks" data-category="arcade" data-order="4"><div class="cover c4"><span class="tag">ARCADE</span>🧱</div><div class="game-body"><h3>Cosmic Blocks</h3><p>Stack, match, and keep the cosmic board under control.</p><div class="game-foot"><small>✨ Classic fun</small><button class="btn primary demo" data-game="Cosmic Blocks">View game</button></div></div></article>
   <article class="game" data-name="jungle jump" data-category="arcade" data-order="5"><div class="cover c5"><span class="tag">ARCADE</span>🐒</div><div class="game-body"><h3>Jungle Jump</h3><p>Leap across wild platforms and see how far you can go.</p><div class="game-foot"><small>🌿 Adventure</small><button class="btn primary demo" data-game="Jungle Jump">View game</button></div></div></article>
   <article class="game" data-name="brain spark" data-category="puzzle" data-order="6"><div class="cover c6"><span class="tag">PUZZLE</span>💡</div><div class="game-body"><h3>Brain Spark</h3><p>Give your logic a workout with bite-sized challenges.</p><div class="game-foot"><small>💭 Think smart</small><button class="btn primary demo" data-game="Brain Spark">View game</button></div></div></article>
-  </div><p class="note">These are sample game cards for the first website preview. Real playable games will be added after the game pages are prepared.</p></section>
+  </div><p class="note">Six mini-games are ready to play now. Choose any game to launch the Nexora Play arcade.</p></section>
   <section id="mobile"><div class="promo"><div><h2>Gaming goes wherever you go 📱</h2><p>Discover mobile games for your phone. We’ll link to official app stores as the mobile collection grows.</p><div class="actions"><button class="btn secondary" id="mobileBtn">Explore mobile games</button></div></div><div class="promo-icon" aria-hidden="true">🎯</div></div></section>
   <section id="news"><div class="section-head"><div><h2>Inside the gaming universe</h2><p>Updates, guides, and stories are coming to Nexora Play.</p></div></div><div class="news"><article><div class="news-icon">📰</div><h3>Gaming news</h3><p>A dedicated place for gaming announcements and updates.</p></article><article><div class="news-icon">🕹️</div><h3>Game discoveries</h3><p>Find interesting games and hidden gems to try next.</p></article><article><div class="news-icon">🌟</div><h3>Community picks</h3><p>In a future update, community favourites can take the spotlight.</p></article></div><p class="note">News cards are placeholders, not live news articles.</p></section>
   </div>
@@ -57,8 +57,8 @@
   searchInput.addEventListener('input',renderGames);sortSelect.addEventListener('change',renderGames);
   let toastTimer;
   function showToast(message){const toast=document.getElementById('toast');toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),3000)}
-  document.querySelectorAll('.demo').forEach(button=>button.addEventListener('click',()=>showToast(button.dataset.game+' is a demo listing. A playable game will be added in a future update.')));
-  document.getElementById('mobileBtn').addEventListener('click',()=>showToast('The mobile game directory is coming soon.'));
+  document.querySelectorAll('.demo').forEach(button=>button.addEventListener('click',()=>{window.location.href='./games.html'}));
+  document.getElementById('mobileBtn').addEventListener('click',()=>window.location.href='./games.html');
   const menuBtn=document.getElementById('menuBtn');const navlinks=document.getElementById('navlinks');
   menuBtn.addEventListener('click',()=>{const open=navlinks.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open))});
   navlinks.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{navlinks.classList.remove('open');menuBtn.setAttribute('aria-expanded','false')}));
