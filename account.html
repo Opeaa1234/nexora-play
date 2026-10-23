@@ -51,11 +51,17 @@ async function showSession(session){
  if(!session){authArea.classList.remove('hidden');signedIn.classList.add('hidden');return}
  authArea.classList.add('hidden');signedIn.classList.remove('hidden');
  document.getElementById('playerEmail').textContent=session.user.email||'Signed-in player';
- const fallback=(session.user.email||'Player').split('@')[0];
- let profileName=fallback;
+ const fallback=(session.user.email||'Player').split('@')[0].replace(/[^A-Za-z0-9_]/g,'_').slice(0,24);
+ let profileName=session.user.user_metadata?.username||fallback||'Player';
  const {data,error}=await supabase.from('player_profiles').select('username,display_name').eq('id',session.user.id).maybeSingle();
- if(error){document.getElementById('profileStatus').textContent='You are signed in. Profile setup will be available once database permissions are checked.'}
- if(data?.username)profileName=data.display_name||data.username;
+ if(error){document.getElementById('profileStatus').textContent='You are signed in, but we could not load your profile: '+error.message;document.getElementById('playerName').textContent=profileName;return}
+ if(data?.username){profileName=data.display_name||data.username}
+ else {
+  const candidate=validUsername(profileName)?profileName:('Player_'+session.user.id.slice(0,8));
+  const {error:insertError}=await supabase.from('player_profiles').insert({id:session.user.id,username:candidate,display_name:candidate});
+  if(insertError){document.getElementById('profileStatus').textContent='You are signed in, but your username could not be saved ('+insertError.message+'). We can fix this next.'}
+  else {profileName=candidate;document.getElementById('profileStatus').textContent='Your player profile is ready.'}
+ }
  document.getElementById('playerName').textContent=profileName;
 }
 form.addEventListener('submit',async event=>{
@@ -66,13 +72,10 @@ form.addEventListener('submit',async event=>{
   if(mode==='signup'){
    const username=document.getElementById('username').value.trim();
    if(!validUsername(username)){message('Choose a username with 3–24 letters, numbers or underscores.');return}
-   const {data,error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:'https://opeaa1234.github.io/nexora-play/'}});
+   const {data,error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:'https://opeaa1234.github.io/nexora-play/account.html',data:{username}}});
    if(error)throw error;
-   if(data.session){
-    const {error:profileError}=await supabase.from('player_profiles').insert({id:data.user.id,username,display_name:username});
-    if(profileError){message('Your account was created, but the profile could not be saved yet. Please contact the site owner.');return}
-    message('Account created successfully.');await showSession(data.session);
-   }else{message('Check your email for a confirmation link. After confirming, return here and log in.')}
+   if(data.session){message('Account created. Setting up your player profile…');await showSession(data.session)}
+   else{message('Check your email for the confirmation link. Your chosen username is saved with your signup. After confirming, return here and log in.')}
   }else{
    const {data,error}=await supabase.auth.signInWithPassword({email,password});
    if(error)throw error;
