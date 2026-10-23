@@ -31,7 +31,7 @@ a{color:#a9c0ff}main{width:min(720px,100%)}.brand{display:block;text-align:cente
 <h2 class="dash-title">Your gaming dashboard</h2>
 <div class="dash-grid">
  <article class="dash-card"><h2>🎮 Explore games</h2><p>Choose a game from the arcade and keep playing to improve your skills.</p><a href="./games.html">Browse all games →</a></article>
- <article class="dash-card"><h2>⭐ Personal bests</h2><p>Your high scores will appear here as we connect game scores to your account.</p><span class="dash-note">Score tracking coming next</span></article>
+ <article class="dash-card"><h2>⭐ Personal bests</h2><p>Your saved high scores from the arcade.</p><div id="personalBests" class="dash-note">Loading personal bests…</div></article>
  <article class="dash-card"><h2>💙 Favorite games</h2><p>We’re preparing a place to keep your favorite games together.</p><span class="dash-note">Favorites coming next</span></article>
  <article class="dash-card"><h2>🏆 Leaderboards</h2><p>Compare scores with other players once score saving is ready.</p><span class="dash-note">Leaderboards planned</span></article>
 </div>
@@ -70,6 +70,20 @@ async function showSession(session){
   else {profileName=candidate;document.getElementById('profileStatus').textContent='Your player profile is ready.'}
  }
  document.getElementById('playerName').textContent=profileName;
+ await loadPersonalBests(session.user.id);
+}
+async function loadPersonalBests(userId){
+ const target=document.getElementById('personalBests');
+ if(!target)return;
+ target.textContent='Loading personal bests…';
+ const {data,error}=await supabase.from('player_best_scores').select('game_id,best_score,updated_at').eq('user_id',userId).order('best_score',{ascending:false});
+ if(error){target.textContent='Scores will appear here once score saving is available.';console.error('Could not load personal bests:',error.message);return}
+ if(!data||data.length===0){target.textContent='No saved scores yet. Play Space Defender while logged in to record your first personal best.';return}
+ const names={'space-defender':'Space Defender'};
+ target.innerHTML='';
+ const list=document.createElement('ul');list.style.paddingLeft='20px';list.style.margin='8px 0';
+ data.forEach(row=>{const item=document.createElement('li');item.textContent=(names[row.game_id]||row.game_id.replace(/-/g,' ').replace(/\\b\\w/g,c=>c.toUpperCase()))+': '+row.best_score;list.appendChild(item)});
+ target.appendChild(list);
 }
 form.addEventListener('submit',async event=>{
  event.preventDefault();submitBtn.disabled=true;message(mode==='login'?'Signing in…':'Creating your account…');
