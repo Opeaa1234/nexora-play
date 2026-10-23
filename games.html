@@ -144,7 +144,7 @@ g.strokeStyle='rgba(73,130,255,.09)';for(let x=0;x<420;x+=42){g.beginPath();g.mo
 if(!spaceGameOver){shipX=Math.max(25,Math.min(395,shipX+spaceMoveDir*5));if(spaceFrame%12===0)spaceShots.push({x:shipX,y:445,vy:9});if(spaceFrame%Math.max(16,45-Math.floor(spaceScore/4))===0)spaceEnemies.push({x:25+Math.random()*370,y:-25,phase:Math.random()*6.28,v:1.5+Math.random()*1.2})}
 spaceShots.forEach(s=>s.y-=s.vy);spaceEnemies.forEach(e=>{e.y+=e.v;e.x+=Math.sin(spaceFrame*.04+e.phase)*1.1});
 spaceShots.forEach(s=>spaceEnemies.forEach(e=>{if(!e.dead&&Math.abs(s.x-e.x)<19&&Math.abs(s.y-e.y)<19){e.dead=true;s.dead=true;spaceScore+=10;for(let i=0;i<12;i++)spaceParticles.push({x:e.x,y:e.y,vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5,life:18,color:Math.random()>.5?'#ff5b9a':'#6ee7ff'})}}));
-spaceEnemies.forEach(e=>{if(!e.dead&&e.y>450){e.dead=true;spaceHull--;if(spaceHull<=0){spaceGameOver=true;clearInterval(spaceLoop);document.getElementById('spaceStatus').textContent='MISSION FAILED · Score '+spaceScore+' · Restart to try again'}else document.getElementById('spaceStatus').textContent='Hull hit! '+spaceHull+' shields remaining.'}});
+spaceEnemies.forEach(e=>{if(!e.dead&&e.y>450){e.dead=true;spaceHull--;if(spaceHull<=0){spaceGameOver=true;clearInterval(spaceLoop);document.getElementById('spaceStatus').textContent='MISSION FAILED · Score '+spaceScore+' · Restart to try again';if(window.saveNexoraScore)window.saveNexoraScore('space-defender',spaceScore)}else document.getElementById('spaceStatus').textContent='Hull hit! '+spaceHull+' shields remaining.'}});
 spaceShots=spaceShots.filter(s=>s.y>0&&!s.dead);spaceEnemies=spaceEnemies.filter(e=>!e.dead&&e.y<545);
 spaceParticles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.life--;g.globalAlpha=Math.max(0,p.life/18);g.fillStyle=p.color;g.fillRect(p.x,p.y,4,4)});spaceParticles=spaceParticles.filter(p=>p.life>0);g.globalAlpha=1;
 spaceShots.forEach(s=>{spaceGlow(g,'#69f5ff',16);g.fillStyle='#e9ffff';g.fillRect(s.x-2,s.y,4,15);g.shadowBlur=0});
@@ -216,4 +216,40 @@ function nextColor(){colorAnswer=Math.floor(Math.random()*colorNames.length);doc
 function pickColor(i){if(colorTime===null)return;colorScore+=i===colorAnswer?1:0;document.getElementById('colorStatus').textContent='Score: '+colorScore;nextColor()}
 
 startSnake();clearInterval(snakeTimer);snakeRun=false;drawSnake();
-</script></body></html>
+</script>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from './supabase-config.js';
+const scoreClient = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+window.saveNexoraScore = async function(gameId, score) {
+  try {
+    const { data: { session }, error: sessionError } = await scoreClient.auth.getSession();
+    if (sessionError || !session) {
+      const status = document.getElementById('spaceStatus');
+      if (status) status.textContent += ' Log in to save your personal best.';
+      return;
+    }
+    const { data: existing, error: readError } = await scoreClient
+      .from('player_best_scores').select('best_score')
+      .eq('user_id', session.user.id).eq('game_id', gameId).maybeSingle();
+    if (readError) throw readError;
+    if (existing && Number(existing.best_score) >= Number(score)) {
+      const status = document.getElementById('spaceStatus');
+      if (status) status.textContent += ' Your personal best is still ' + existing.best_score + '.';
+      return;
+    }
+    const { error: saveError } = await scoreClient.from('player_best_scores').upsert({
+      user_id: session.user.id, game_id: gameId, best_score: Number(score),
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id,game_id' });
+    if (saveError) throw saveError;
+    const status = document.getElementById('spaceStatus');
+    if (status) status.textContent += ' Personal best saved!';
+  } catch (error) {
+    console.error('Nexora Play score save failed:', error);
+    const status = document.getElementById('spaceStatus');
+    if (status) status.textContent += ' Score could not be saved right now.';
+  }
+};
+</script>
+</body></html>
