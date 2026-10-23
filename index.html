@@ -17,7 +17,31 @@
     footer{border-top:1px solid var(--line);padding:28px 0 35px;color:var(--muted)}.footer-row{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}.footer-row strong{color:var(--text)}.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#f5f7ff;color:#101528;padding:12px 18px;border-radius:12px;font-weight:700;box-shadow:0 8px 35px #0006;transition:.2s;z-index:10}.toast.show{opacity:1;transform:translate(-50%,0)}
     @media(max-width:760px){.hero{grid-template-columns:1fr;padding-top:50px}.hero-art{min-height:220px;grid-row:1}.orb{width:190px;font-size:5rem}.hero-copy{grid-row:2}.navlinks{display:none;position:absolute;top:72px;left:0;right:0;padding:18px 4%;background:#090d1c;border-bottom:1px solid var(--line);flex-direction:column;align-items:flex-start}.navlinks.open{display:flex}.menu{display:block}.category-row{grid-template-columns:repeat(2,1fr)}.games{grid-template-columns:repeat(2,1fr)}.news{grid-template-columns:1fr}.section-head{align-items:start;flex-direction:column}.promo{grid-template-columns:1fr}.promo-icon{display:none}}
     @media(max-width:480px){.games{grid-template-columns:1fr}.cover{height:160px}.category{padding:12px}.hero{gap:12px}.hero-art{min-height:195px}.orb{width:165px}.float.one{left:1%;top:10%}.float.two{right:0;bottom:8%}.tools select{flex:1}.actions .btn{flex:1}}
-  </style>
+  
+/* Nexora Play homepage: premium arcade visual refresh */
+:root{--bg:#050b1c;--panel:#0b1730;--panel2:#102448;--text:#f5f8ff;--muted:#afbfdf;--blue:#21d4fd;--orange:#ffb45f;--purple:#9b72ff;--line:#1c3a68}
+body{background:radial-gradient(ellipse at 12% 8%,#122b65 0,transparent 34%),radial-gradient(ellipse at 88% 18%,#30105a 0,transparent 31%),#050b1c}
+header{background:#050b1ceF;border-bottom:1px solid #1b3c6c;box-shadow:0 8px 28px #0002}
+.brand{font-size:1.42rem;letter-spacing:-.045em}.brand span{background:linear-gradient(90deg,#25d9ff,#9b72ff,#ff78b7);-webkit-background-clip:text;background-clip:text;color:transparent}
+.navlinks a{transition:color .18s}.navlinks a[href="./account.html"]{padding:8px 13px;border:1px solid #31558b;border-radius:10px;color:#e8f5ff;background:#10264a}
+.hero{padding-top:88px;padding-bottom:68px;gap:42px}.eyebrow{background:#0e2344;border-color:#27568a;color:#c8f4ff;box-shadow:0 0 25px #21d4fd0d}.eyebrow:before{background:#38e8c5;box-shadow:0 0 12px #38e8c5}
+h1{letter-spacing:-.075em}.shine{background:linear-gradient(100deg,#20d9ff 0%,#8e7bff 54%,#ff9cce 100%)!important;-webkit-background-clip:text!important;background-clip:text!important}
+.hero p{font-size:1.12rem;line-height:1.8}.primary{background:linear-gradient(105deg,#078acb,#6557f5 72%,#9948e8);box-shadow:0 9px 26px #3c55ed2b}.secondary{border-color:#294975;background:#0b1931}
+.hero-art{min-height:335px}.orb{background:radial-gradient(circle at 28% 22%,#56edff,#2876f4 37%,#6445dd 68%,#a72fd1);box-shadow:0 0 50px #257cff55,0 0 110px #6c4cff2b;border:1px solid #79efff80;font-size:7rem}
+.float{border-color:#2a5b90!important;background:#07172ee8!important;box-shadow:0 12px 35px #0005;color:#dff8ff!important}
+section{margin:0 0 54px}.section-head h2{font-size:clamp(1.55rem,3vw,2.05rem);letter-spacing:-.04em}.section-head p{font-size:.98rem}
+.category{background:linear-gradient(145deg,#102449,#09162d);border-color:#1e3e6b;min-height:92px;transition:transform .18s,border-color .18s,background .18s}.category:hover{transform:translateY(-3px);border-color:#347cb7}.category.active{border-color:#3f8de8;background:linear-gradient(135deg,#153d70,#24205a);box-shadow:0 8px 25px #1e71ca20}.category .emoji{filter:drop-shadow(0 0 9px #4fcfff45)}
+.tools input,.tools select{background:#08152c;border-color:#234571}.tools input:focus,.tools select:focus{border-color:#2edbff}
+.game{border-color:#1c3b68;background:linear-gradient(160deg,#0d1d39,#071328);box-shadow:0 10px 30px #0002}.game:hover{transform:translateY(-6px);border-color:#3b8ec9;box-shadow:0 18px 36px #0004,0 0 24px #2779ce13}
+.cover{height:165px;background:radial-gradient(circle at 25% 15%,#2876bd,#42319b 60%,#151b4b)}.cover.c2{background:linear-gradient(135deg,#073d59,#126c83,#2a276f)}.cover.c3{background:linear-gradient(135deg,#51224f,#a13f68,#df7859)}.cover.c4{background:linear-gradient(135deg,#182e65,#3f5f9d)}.cover.c5{background:linear-gradient(135deg,#3a2477,#7650b4,#b45ba7)}.cover.c6{background:linear-gradient(135deg,#264b57,#557e43,#9a873f)}
+.tag{background:#06132be8;border-color:#83dfff3b;color:#dffaff}.game-body{padding:18px}.game-body h3{font-size:1.13rem}.game-body p{line-height:1.6}.game-foot .btn{padding:9px 13px}
+.promo{position:relative;overflow:hidden;border-color:#31558c;background:radial-gradient(ellipse at 90% 20%,#49308a 0,transparent 35%),linear-gradient(110deg,#102d58,#171642 80%);box-shadow:0 18px 48px #0003}.promo:after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(#20d9ff,#8e6cff,#ff79b9)}.promo h2{letter-spacing:-.04em}.promo-icon{filter:drop-shadow(0 0 20px #7a69ff66)}
+.news article{border-color:#1c3b68;background:linear-gradient(150deg,#102144,#09152a);transition:transform .18s,border-color .18s}.news article:hover{transform:translateY(-3px);border-color:#3b79ae}.news h3{letter-spacing:-.02em}.note{color:#9aafd3}
+footer{border-color:#1b3b66;background:#040918}.toast{background:#dffaff;color:#061329}
+@media(max-width:760px){.hero{padding-top:45px;padding-bottom:45px}.hero-art{min-height:215px}.orb{width:185px;font-size:5rem}.section-head h2{font-size:1.55rem}.cover{height:140px}}
+@media(max-width:480px){.brand{font-size:1.18rem}.hero{gap:10px}.hero-art{min-height:180px}.orb{width:155px;font-size:4.2rem}.game-body{padding:15px}.cover{height:155px}}
+
+</style>
 </head>
 <body>
 <header><div class="wrap"><nav aria-label="Main navigation"><a class="brand" href="#home" aria-label="Nexora Play home">NEXORA <span>PLAY</span></a><div class="navlinks" id="navlinks"><a href="#games">Browser Games</a><a href="#mobile">Mobile Games</a><a href="#news">Gaming News</a><a href="./account.html">Player Account</a></div><button class="menu" id="menuBtn" aria-expanded="false" aria-controls="navlinks">Menu ☰</button></nav></div></header>
