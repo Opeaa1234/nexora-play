@@ -36,7 +36,7 @@
 <section id="runner" class="panel hidden center"><h2>🏃 Endless Runner</h2><p class="muted">Tap Jump to clear obstacles. Space also works on keyboard.</p><canvas id="runnerCanvas" width="320" height="220"></canvas><button class="action" onclick="runnerJump()">⬆️ Jump</button> <button class="action" onclick="startRunner()">Restart</button><p id="runnerStatus" class="status">Ready to run!</p></section>
 </main><footer><div class="wrap">© <span id="year"></span> Nexora Play · Play fair, have fun.</div></footer>
 <script>
-const panels=['snake','memory','tic','guess','brick','tap','racer','jump','space','penalty','runner'];function show(id){panels.forEach(p=>document.getElementById(p).classList.toggle('hidden',p!==id));document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'})}
+const panels=['snake','memory','tic','guess','brick','tap','racer','jump','space','penalty','runner','rps','quiz','color'];function show(id){panels.forEach(p=>document.getElementById(p).classList.toggle('hidden',p!==id));document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'})}
 document.getElementById('year').textContent=new Date().getFullYear();
 let snakeTimer=null,snake=[],dir={x:1,y:0},food={x:5,y:5},snakeRun=false,score=0;
 const sc=document.getElementById('snakeCanvas'),sx=sc.getContext('2d');
@@ -84,9 +84,9 @@ function startQuiz(){show('quiz');quizIndex=0;quizPoints=0;renderQuiz()}
 function renderQuiz(){if(quizIndex>=quizData.length){document.getElementById('quizQuestion').textContent='Quiz complete!';document.getElementById('quizChoices').innerHTML='';document.getElementById('quizStatus').textContent='Final score: '+quizPoints+'/'+quizData.length;return}const q=quizData[quizIndex];document.getElementById('quizQuestion').textContent=(quizIndex+1)+'. '+q.q;document.getElementById('quizChoices').innerHTML=q.a.map((a,i)=>'<button class="action" onclick="answerQuiz('+i+')">'+a+'</button>').join('');document.getElementById('quizStatus').textContent='Score: '+quizPoints}
 function answerQuiz(i){if(i===quizData[quizIndex].c)quizPoints++;quizIndex++;renderQuiz()}
 const colorNames=['Red','Blue','Green','Yellow'];const colorCodes=['#ff4d5e','#4d8dff','#3bd18b','#ffd447'];let colorScore=0,colorTime=null,colorAnswer=0;
-function startColor(){show('color');clearInterval(colorTime);colorScore=0;nextColor();document.getElementById('colorStatus').textContent='Score: 0 · 20 seconds';let left=20;colorTime=setInterval(()=>{left--;document.getElementById('colorStatus').textContent='Score: '+colorScore+' · Time: '+left+'s';if(left<=0){clearInterval(colorTime);document.getElementById('colorStatus').textContent='Time up! Final score: '+colorScore}},1000)}
+function startColor(){show('color');clearInterval(colorTime);colorTime=null;colorScore=0;nextColor();document.getElementById('colorStatus').textContent='Score: 0 · 20 seconds';let left=20;colorTime=setInterval(()=>{left--;document.getElementById('colorStatus').textContent='Score: '+colorScore+' · Time: '+left+'s';if(left<=0){clearInterval(colorTime);colorTime=null;document.getElementById('colorStatus').textContent='Time up! Final score: '+colorScore}},1000)}
 function nextColor(){colorAnswer=Math.floor(Math.random()*colorNames.length);document.getElementById('colorTarget').textContent=colorNames[colorAnswer];document.getElementById('colorTarget').style.color=colorCodes[colorAnswer];document.getElementById('colorChoices').innerHTML=colorNames.map((n,i)=>'<button class="action" style="background:'+colorCodes[i]+';color:#111" onclick="pickColor('+i+')">'+n+'</button>').join('')}
-function pickColor(i){if(!colorTime)return;colorScore+=i===colorAnswer?1:0;document.getElementById('colorStatus').textContent='Score: '+colorScore;nextColor()}
+function pickColor(i){if(colorTime===null)return;colorScore+=i===colorAnswer?1:0;document.getElementById('colorStatus').textContent='Score: '+colorScore;nextColor()}
 
 startSnake();clearInterval(snakeTimer);snakeRun=false;drawSnake();
 </script></body></html>
