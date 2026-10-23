@@ -65,5 +65,13 @@
   document.getElementById('year').textContent=new Date().getFullYear();
   renderGames();
 </script>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+  import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from './supabase-config.js';
+  // Initialize the public client only; no private player data is read or written here.
+  window.nexoraSupabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  window.dispatchEvent(new CustomEvent('nexora-supabase-ready'));
+</script>
 </body>
 </html>
