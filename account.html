@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#090d1c">
+<title>Player Account | Nexora Play</title>
+<style>
+:root{color-scheme:dark;--bg:#090d1c;--panel:#11182b;--text:#f5f7ff;--muted:#a4aec7;--blue:#5b8cff;--line:#27324d}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 80% 0%,#182448 0,transparent 40%),var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;display:grid;place-items:center;padding:24px}
+a{color:#a9c0ff}main{width:min(460px,100%)}.brand{display:block;text-align:center;font-weight:900;font-size:1.5rem;letter-spacing:-.04em;text-decoration:none;color:var(--text);margin-bottom:20px}.brand span{color:var(--blue)}.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:26px;box-shadow:0 20px 70px #0004}h1{margin:0 0 6px;font-size:1.8rem;letter-spacing:-.04em}p{color:var(--muted);margin:0 0 20px}.tabs{display:flex;gap:8px;margin:20px 0}.tabs button,button{font:inherit;cursor:pointer;border-radius:10px;padding:10px 13px;border:1px solid var(--line);background:#151f37;color:var(--text);font-weight:700}.tabs button{flex:1}.tabs button.active,button.primary{background:linear-gradient(100deg,var(--blue),#8069ff);border-color:transparent}.field{margin:14px 0}.field label{display:block;font-size:.9rem;font-weight:700;margin-bottom:6px}.field input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:#090d1c;color:var(--text);font:inherit}.primary{width:100%;margin-top:8px}.status{margin-top:15px;padding:11px 12px;border-radius:10px;background:#0c1425;border:1px solid var(--line);overflow-wrap:anywhere}.status:empty{display:none}.small{font-size:.88rem;text-align:center;margin:17px 0 0}.profile{padding:15px;border:1px solid var(--line);border-radius:12px;margin:16px 0}.hidden{display:none!important}.back{display:block;text-align:center;margin-top:18px;text-decoration:none}.hint{font-size:.85rem}
+</style>
+</head>
+<body>
+<main>
+<a class="brand" href="./index.html">NEXORA <span>PLAY</span></a>
+<section class="panel">
+<h1>Your player account</h1>
+<p>Sign in to Nexora Play or create an account to get started.</p>
+<div id="authArea">
+<div class="tabs" role="tablist" aria-label="Account action"><button type="button" id="loginTab" class="active">Log in</button><button type="button" id="signupTab">Create account</button></div>
+<form id="authForm">
+<div class="field"><label for="email">Email address</label><input id="email" type="email" autocomplete="email" required placeholder="you@example.com"></div>
+<div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" minlength="8" required placeholder="At least 8 characters"></div>
+<div id="usernameField" class="field hidden"><label for="username">Choose a username</label><input id="username" autocomplete="username" maxlength="24" pattern="[A-Za-z0-9_]{3,24}" placeholder="3–24 letters, numbers or underscores"><div class="hint">Use 3–24 letters, numbers or underscores.</div></div>
+<button class="primary" id="submitBtn" type="submit">Log in</button>
+</form>
+<div id="status" class="status" role="status" aria-live="polite"></div>
+</div>
+<div id="signedIn" class="hidden">
+<div class="profile"><strong id="playerName">Player</strong><div id="playerEmail" class="hint"></div></div>
+<button type="button" id="logoutBtn" class="primary">Log out</button>
+<div id="profileStatus" class="status" role="status" aria-live="polite"></div>
+</div>
+</section>
+<a class="back" href="./games.html">← Back to the games arcade</a>
+</main>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from './supabase-config.js';
+const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+const form=document.getElementById('authForm'),status=document.getElementById('status');
+const authArea=document.getElementById('authArea'),signedIn=document.getElementById('signedIn');
+const loginTab=document.getElementById('loginTab'),signupTab=document.getElementById('signupTab');
+const usernameField=document.getElementById('usernameField'),submitBtn=document.getElementById('submitBtn');
+let mode='login';
+function message(text){status.textContent=text}
+function setMode(next){mode=next;loginTab.classList.toggle('active',mode==='login');signupTab.classList.toggle('active',mode==='signup');usernameField.classList.toggle('hidden',mode!=='signup');document.getElementById('password').autocomplete=mode==='login'?'current-password':'new-password';submitBtn.textContent=mode==='login'?'Log in':'Create account';message('')}
+loginTab.addEventListener('click',()=>setMode('login'));signupTab.addEventListener('click',()=>setMode('signup'));
+function validUsername(value){return /^[A-Za-z0-9_]{3,24}$/.test(value)}
+async function showSession(session){
+ if(!session){authArea.classList.remove('hidden');signedIn.classList.add('hidden');return}
+ authArea.classList.add('hidden');signedIn.classList.remove('hidden');
+ document.getElementById('playerEmail').textContent=session.user.email||'Signed-in player';
+ const fallback=(session.user.email||'Player').split('@')[0];
+ let profileName=fallback;
+ const {data,error}=await supabase.from('player_profiles').select('username,display_name').eq('id',session.user.id).maybeSingle();
+ if(error){document.getElementById('profileStatus').textContent='You are signed in. Profile setup will be available once database permissions are checked.'}
+ if(data?.username)profileName=data.display_name||data.username;
+ document.getElementById('playerName').textContent=profileName;
+}
+form.addEventListener('submit',async event=>{
+ event.preventDefault();submitBtn.disabled=true;message(mode==='login'?'Signing in…':'Creating your account…');
+ const email=document.getElementById('email').value.trim();
+ const password=document.getElementById('password').value;
+ try{
+  if(mode==='signup'){
+   const username=document.getElementById('username').value.trim();
+   if(!validUsername(username)){message('Choose a username with 3–24 letters, numbers or underscores.');return}
+   const {data,error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:'https://opeaa1234.github.io/nexora-play/'}});
+   if(error)throw error;
+   if(data.session){
+    const {error:profileError}=await supabase.from('player_profiles').insert({id:data.user.id,username,display_name:username});
+    if(profileError){message('Your account was created, but the profile could not be saved yet. Please contact the site owner.');return}
+    message('Account created successfully.');await showSession(data.session);
+   }else{message('Check your email for a confirmation link. After confirming, return here and log in.')}
+  }else{
+   const {data,error}=await supabase.auth.signInWithPassword({email,password});
+   if(error)throw error;
+   await showSession(data.session);
+  }
+ }catch(error){message(error.message||'Something went wrong. Please try again.')}
+ finally{submitBtn.disabled=false}
+});
+document.getElementById('logoutBtn').addEventListener('click',async()=>{
+ const {error}=await supabase.auth.signOut();
+ document.getElementById('profileStatus').textContent=error?error.message:'You have logged out.';
+ if(!error)await showSession(null);
+});
+supabase.auth.onAuthStateChange((_event,session)=>{showSession(session)});
+const {data:{session}}=await supabase.auth.getSession();await showSession(session);
+</script>
+</body></html>
