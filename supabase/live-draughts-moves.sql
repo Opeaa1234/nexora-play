@@ -124,7 +124,7 @@ begin
     if v_must_capture then raise exception 'A capture is available and must be taken.'; end if;
   end if;
 
-  b[p_from+1] := null;
+  -- Restore the requested destination after scanning the board for compulsory captures.\n  v_tr := p_to / 8; v_tc := p_to % 8;\n  b[p_from+1] := null;
   if v_capture is not null then b[v_capture+1] := null; end if;
   if v_piece='r' and v_tr=0 then v_piece:='R'; elsif v_piece='b' and v_tr=7 then v_piece:='B'; end if;
   b[p_to+1] := v_piece;
