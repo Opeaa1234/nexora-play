@@ -57,7 +57,7 @@ begin
   if v_user <> v_room.host_id and v_user <> v_room.guest_id then raise exception 'You are not a player in this room.'; end if;
 
   v_board := v_room.game_state->'board';
-  if jsonb_typeof(v_board) <> 'array' or jsonb_array_length(v_board) <> 64 then
+  if coalesce(jsonb_typeof(v_board), 'null') <> 'array' or jsonb_array_length(v_board) <> 64 then
     for idx in 0..63 loop
       if ((idx / 8 + idx % 8) % 2) = 1 then
         if idx / 8 < 3 then b[idx+1] := 'b';
@@ -70,7 +70,7 @@ begin
     v_moves := '[]'::jsonb;
   else
     for idx in 0..63 loop
-      if v_board->idx is not null and v_board->idx <> 'null'::jsonb then
+      if (v_board->idx) is not null and (v_board->idx) <> 'null'::jsonb then
         b[idx+1] := v_board->>idx;
       end if;
     end loop;
