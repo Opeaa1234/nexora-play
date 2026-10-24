@@ -17,6 +17,12 @@ Official starting points:
 - Gaming categories: https://lslga.org/gaming-categories/
 - LSLGA contact: info@lslga.org
 
+## Official category note (checked 24 October 2026)
+
+LSLGA's official “Scratch Card & Interactive Gaming” page describes interactive games as games involving active interaction with one or more players, where the rules and mode of play are determined by the licensee subject to LSLGA approval: https://lslga.org/scratch-card-interactive-gaming-licenses/
+
+This may be relevant to multiplayer chess and draughts, but it does **not** confirm that this is the correct category for cash-staked player-versus-player play. Ask LSLGA to confirm in writing whether the interactive-games category, Other Games, or another licence/permit applies, including any separate requirements for handling stakes and payouts. Do not pay for certification or submit under an assumed category before confirmation.
+
 ## 2. Company and ownership documents
 
 Confirm the current requirements with LSLGA and a Nigerian lawyer/accountant.
