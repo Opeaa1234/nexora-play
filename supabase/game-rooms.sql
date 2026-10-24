@@ -38,10 +38,15 @@ on public.game_rooms for insert to authenticated
 with check (host_id = (select auth.uid()) and guest_id is null and status = 'waiting');
 
 drop policy if exists "Host or guest can update their room" on public.game_rooms;
+drop policy if exists "Players can join an open room" on public.game_rooms;
 create policy "Host or guest can update their room"
 on public.game_rooms for update to authenticated
 using (host_id = (select auth.uid()) or guest_id = (select auth.uid()))
 with check (host_id = (select auth.uid()) or guest_id = (select auth.uid()));
+create policy "Players can join an open room"
+on public.game_rooms for update to authenticated
+using (guest_id is null and host_id <> (select auth.uid()) and status = 'waiting')
+with check (guest_id = (select auth.uid()) and host_id <> (select auth.uid()) and status in ('waiting', 'playing'));
 
 -- Realtime Postgres Changes: enable this table in the supabase_realtime publication
 -- after running the SQL, from Database > Publications in Supabase Dashboard.
