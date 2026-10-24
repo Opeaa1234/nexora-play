@@ -39,6 +39,8 @@ h1{font-size:clamp(1.8rem,4vw,2.7rem);line-height:1.1;margin-bottom:10px} .panel
 @media(max-width:640px){main{padding:14px 12px 28px}.brand{font-size:1.05rem;padding:12px}.brand:after{font-size:.58rem;letter-spacing:.08em}.dash-grid{grid-template-columns:1fr}.dash-card{min-height:unset;padding:19px}.panel{border-radius:18px}.profile:after{font-size:3.5rem;right:10px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
 
+
+.profile-top{display:flex;align-items:center;gap:20px;position:relative;z-index:1}.avatar-wrap{width:120px;flex:0 0 120px}.avatar-wrap img{width:120px;height:120px;object-fit:cover;border-radius:50%;border:3px solid #46d9ff;background:#102b59;display:block;margin-bottom:10px}.avatar-label{display:block;font-size:.78rem;font-weight:700;margin:8px 0 5px}.avatar-wrap input,.profile-edit input{width:100%;padding:10px;border:1px solid #315078;border-radius:10px;background:#07152b;color:var(--text);font:inherit;font-size:.85rem}.profile-identity{min-width:0}.profile-edit{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end;margin:18px 0 10px;position:relative;z-index:1}.profile-edit .field{margin:0}.profile-edit button{white-space:nowrap}.profile .hint{overflow-wrap:anywhere}@media(max-width:520px){.profile-top{align-items:flex-start;flex-direction:column;gap:12px}.avatar-wrap{width:100%;flex:auto;display:grid;grid-template-columns:80px 1fr;column-gap:12px;align-items:center}.avatar-wrap img{width:80px;height:80px;grid-row:span 2}.avatar-label{margin:0}.profile-edit{grid-template-columns:1fr}.profile-edit button{width:100%}}
 </style>
 </head>
 <body>
@@ -58,7 +60,11 @@ h1{font-size:clamp(1.8rem,4vw,2.7rem);line-height:1.1;margin-bottom:10px} .panel
 <div id="status" class="status" role="status" aria-live="polite"></div>
 </div>
 <div id="signedIn" class="hidden">
-<div class="profile"><strong id="playerName">Player</strong><div id="playerEmail" class="hint"></div><div class="hint">Welcome back to Nexora Play!</div></div>
+<div class="profile">
+<div class="profile-top"><div class="avatar-wrap"><img id="avatarPreview" alt="Player profile picture" src="https://placehold.co/120x120/102b59/ffffff?text=NP"><label class="avatar-label" for="avatarUrl">Profile picture URL</label><input id="avatarUrl" type="url" placeholder="Paste an image URL" autocomplete="url"></div><div class="profile-identity"><strong id="playerName">Player</strong><div id="playerEmail" class="hint"></div><div class="hint">Welcome back to Nexora Play!</div></div></div>
+<div class="profile-edit"><div class="field"><label for="displayNameInput">Display name</label><input id="displayNameInput" maxlength="40" placeholder="How other players see you"></div><button type="button" id="saveProfileBtn">Save profile details</button></div>
+<div class="hint">Your display name and picture help other competitors recognise you. Image upload will be added after we configure secure profile-picture storage.</div>
+</div>
 <h2 class="dash-title">✨ Your gaming dashboard</h2>
 <div class="dash-grid">
  <article class="dash-card"><h2>🎮 Enter the arcade</h2><p>Discover challenges, sharpen your skills, and chase your next high score.</p><a href="./games.html">Explore all games ↗</a></article>
@@ -91,14 +97,14 @@ async function showSession(session){
  document.getElementById('playerEmail').textContent=session.user.email||'Signed-in player';
  const fallback=(session.user.email||'Player').split('@')[0].replace(/[^A-Za-z0-9_]/g,'_').slice(0,24);
  let profileName=session.user.user_metadata?.username||fallback||'Player';
- const {data,error}=await supabase.from('player_profiles').select('username,display_name').eq('id',session.user.id).maybeSingle();
+ const {data,error}=await supabase.from('player_profiles').select('username,display_name,avatar_url').eq('id',session.user.id).maybeSingle();
  if(error){document.getElementById('profileStatus').textContent='You are signed in, but we could not load your profile: '+error.message;document.getElementById('playerName').textContent=profileName;return}
- if(data?.username){profileName=data.display_name||data.username}
+ if(data?.username){profileName=data.display_name||data.username;document.getElementById('displayNameInput').value=data.display_name||data.username;document.getElementById('avatarUrl').value=data.avatar_url||'';if(data.avatar_url)document.getElementById('avatarPreview').src=data.avatar_url}
  else {
   const candidate=validUsername(profileName)?profileName:('Player_'+session.user.id.slice(0,8));
   const {error:insertError}=await supabase.from('player_profiles').insert({id:session.user.id,username:candidate,display_name:candidate});
   if(insertError){document.getElementById('profileStatus').textContent='You are signed in, but your username could not be saved ('+insertError.message+'). We can fix this next.'}
-  else {profileName=candidate;document.getElementById('profileStatus').textContent='Your player profile is ready.'}
+  else {profileName=candidate;document.getElementById('displayNameInput').value=candidate;document.getElementById('profileStatus').textContent='Your player profile is ready.'}
  }
  document.getElementById('playerName').textContent=profileName;
  await loadPersonalBests(session.user.id);
@@ -136,6 +142,10 @@ form.addEventListener('submit',async event=>{
  }catch(error){message(error.message||'Something went wrong. Please try again.')}
  finally{submitBtn.disabled=false}
 });
+
+document.getElementById('avatarUrl').addEventListener('input',()=>{const url=document.getElementById('avatarUrl').value.trim();if(url)document.getElementById('avatarPreview').src=url});
+document.getElementById('avatarPreview').addEventListener('error',()=>{document.getElementById('avatarPreview').src='https://placehold.co/120x120/102b59/ffffff?text=NP'});
+document.getElementById('saveProfileBtn').addEventListener('click',async()=>{const btn=document.getElementById('saveProfileBtn');btn.disabled=true;const {data:{session}}=await supabase.auth.getSession();if(!session){document.getElementById('profileStatus').textContent='Please log in again to save profile details.';btn.disabled=false;return}const display_name=document.getElementById('displayNameInput').value.trim();const avatar_url=document.getElementById('avatarUrl').value.trim()||null;if(!display_name){document.getElementById('profileStatus').textContent='Please enter a display name.';btn.disabled=false;return}if(avatar_url){try{const u=new URL(avatar_url);if(!['https:','http:'].includes(u.protocol))throw Error()}catch{document.getElementById('profileStatus').textContent='Please enter a valid image URL starting with https://';btn.disabled=false;return}}const {error}=await supabase.from('player_profiles').update({display_name,avatar_url}).eq('id',session.user.id);document.getElementById('profileStatus').textContent=error?'Could not save profile: '+error.message:'Profile details saved!';if(!error)document.getElementById('playerName').textContent=display_name;btn.disabled=false});
 document.getElementById('logoutBtn').addEventListener('click',async()=>{
  const {error}=await supabase.auth.signOut();
  document.getElementById('profileStatus').textContent=error?error.message:'You have logged out.';
