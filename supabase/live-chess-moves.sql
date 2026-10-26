@@ -33,7 +33,9 @@ begin
   if p_move is null or p_move !~ '^[a-h][1-8][a-h][1-8][qrbn]?$' then
     raise exception 'Invalid move format.';
   end if;
-  if jsonb_typeof(p_expected_moves) <> 'array'
+  if p_expected_moves is null
+     or jsonb_typeof(p_expected_moves) <> 'array'
+     or p_next_state is null
      or jsonb_typeof(p_next_state) <> 'object'
      or jsonb_typeof(p_next_state->'moves') <> 'array' then
     raise exception 'Invalid chess state payload.';
