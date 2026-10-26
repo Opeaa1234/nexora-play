@@ -74,13 +74,24 @@ begin
     v_moves := '[]'::jsonb;
   else
     for idx in 0..63 loop
-      if (v_board->idx) is not null and (v_board->idx) <> 'null'::jsonb then
-        b[idx+1] := v_board->>idx;
+      if jsonb_typeof(v_board->idx) is distinct from 'null' then
+        v_piece := v_board->>idx;
+        if v_piece not in ('r','b','R','B') then
+          raise exception 'Saved Draughts board contains an invalid piece.';
+        end if;
+        b[idx+1] := v_piece;
       end if;
     end loop;
     v_turn := coalesce(v_room.game_state->>'turn','r');
+    if v_turn not in ('r','b') then raise exception 'Saved Draughts turn is invalid.'; end if;
     v_forced := nullif(v_room.game_state->>'forced_from','')::integer;
+    if v_forced is not null and v_forced not between 0 and 63 then
+      raise exception 'Saved Draughts continuation square is invalid.';
+    end if;
     v_moves := coalesce(v_room.game_state->'moves','[]'::jsonb);
+    if jsonb_typeof(v_moves) is distinct from 'array' then
+      raise exception 'Saved Draughts move history is invalid.';
+    end if;
   end if;
 
   if (v_turn = 'r' and v_user <> v_room.host_id) or (v_turn = 'b' and v_user <> v_room.guest_id) then
