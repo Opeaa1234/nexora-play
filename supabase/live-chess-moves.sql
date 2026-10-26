@@ -38,7 +38,7 @@ begin
      or jsonb_typeof(p_next_state->'moves') <> 'array' then
     raise exception 'Invalid chess state payload.';
   end if;
-  if p_next_status not in ('playing', 'finished') then
+  if p_next_status is null or p_next_status not in ('playing', 'finished') then
     raise exception 'Invalid chess room status.';
   end if;
 
