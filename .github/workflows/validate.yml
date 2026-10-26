@@ -1,0 +1,24 @@
+name: Validate Nexora Play
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - redevelopment/phase-2-homepage
+
+permissions:
+  contents: read
+
+jobs:
+  static-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate pages and multiplayer security guardrails
+        run: node scripts/validate-project.mjs
