@@ -57,6 +57,10 @@ for (const [file, page] of pages) {
   }
 }
 
+const draughtsSql = await readFile(path.join(root, "supabase/live-draughts-moves.sql"), "utf8").catch(() => "");
+if (!/if case\s+when jsonb_typeof\(v_board\) = 'array' then jsonb_array_length\(v_board\) <> 64\s+else true\s+end then/i.test(draughtsSql)) fail("Draughts board validation must check JSON array length only after confirming the value is an array");
+if (draughtsSql.includes("coalesce(jsonb_typeof(v_board), 'null') <> 'array' or jsonb_array_length(v_board) <> 64")) fail("Draughts board validation contains an unsafe JSON type/length condition");
+
 const chessHtml = pages.get("multiplayer-chess.html")?.source ?? "";
 const chessSql = await readFile(path.join(root, "supabase/live-chess-moves.sql"), "utf8").catch(() => "");
 const edgePath = path.join(root, "supabase/functions/submit-chess-move/index.ts");
