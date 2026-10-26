@@ -131,7 +131,7 @@ begin
   if v_piece='r' and v_tr=0 then v_piece:='R'; elsif v_piece='b' and v_tr=7 then v_piece:='B'; end if;
   b[p_to+1] := v_piece;
 
-  if v_capture is not null and v_piece = lower(v_piece) then
+  if v_capture is not null and (v_king = true or v_piece = lower(v_piece)) then
     v_king := false;
     for dr in -1..1 loop
       for dc in -1..1 loop
