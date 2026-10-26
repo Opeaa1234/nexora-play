@@ -86,7 +86,7 @@ if (!roomSql.includes("alter table public.game_rooms enable row level security")
 if (!roomSql.includes("host_id = (select auth.uid()) and guest_id is null and status = 'waiting'")) fail("Room creation policy must bind new rooms to the authenticated host");
 if (!joinSql.includes("revoke update on table public.game_rooms from authenticated")) fail("Clients must not directly update game room records after secure room joining is installed");
 if (!joinSql.includes("security definer") || !joinSql.includes("set search_path = ''")) fail("Atomic room-join RPC must be SECURITY DEFINER with an empty search_path");
-if (!joinSql.includes("v_user_id := auth.uid()")) fail("Room-join RPC must require an authenticated caller");
+if (!/v_user_id\\s+uuid\\s*:=\\s*auth\\.uid\\(\\)/i.test(joinSql)) fail("Room-join RPC must require an authenticated caller");
 if (!joinSql.includes("for update")) fail("Room-join RPC must lock the room row to prevent simultaneous joins");
 if (!joinSql.includes("v_room.status <> 'waiting'")) fail("Room-join RPC must reject rooms that are no longer waiting");
 if (!joinSql.includes("grant execute on function public.join_game_room(text) to authenticated")) fail("Room-join RPC must be executable by signed-in players");
