@@ -92,7 +92,7 @@ Deno.serve(async (req: Request) => {
   });
   if (saveError) {
     const conflict = /position changed/i.test(saveError.message || "");
-    return reply(conflict ? 409 : 400, { error: conflict ? "The position changed. Refresh and try again." : saveError.message });
+    return reply(conflict ? 409 : 500, { error: conflict ? "The position changed. Refresh and try again." : "The server could not save this move. Refresh and try again." });
   }
   return reply(200, { ok: true, status: ended ? "finished" : "playing", result });
 });
