@@ -12,7 +12,7 @@ function stripQueryHash(value) { return value.split(/[?#]/, 1)[0]; }
 const pages = new Map();
 for (const file of htmlFiles) {
   const source = await readFile(path.join(root, file), "utf8");
-  const ids = [...source.matchAll(/\\bid\\s*=\\s*["']([^"']+)["']/gi)].map((m) => m[1]);
+  const ids = [...source.matchAll(/\bid\s*=\s*["']([^"']+)["']/gi)].map((m) => m[1]);
   const seen = new Set();
   for (const id of ids) {
     if (seen.has(id)) fail(`${file}: duplicate id "${id}"`);
@@ -22,10 +22,10 @@ for (const file of htmlFiles) {
 }
 
 for (const [file, page] of pages) {
-  const refs = [...page.source.matchAll(/\\b(?:href|src)\\s*=\\s*["']([^"']+)["']/gi)];
+  const refs = [...page.source.matchAll(/\b(?:href|src)\s*=\s*["']([^"']+)["']/gi)];
   for (const match of refs) {
     const raw = match[1].trim();
-    if (!raw || /^(?:[a-z]+:|\\/\\/|#|\\{)/i.test(raw)) {
+    if (!raw || /^(?:[a-z]+:|\/\/|#|\{)/i.test(raw)) {
       if (raw.startsWith("#") && raw.length > 1 && !page.ids.has(decodeURIComponent(raw.slice(1)))) {
         fail(`${file}: missing in-page fragment "${raw}"`);
       }
@@ -55,14 +55,14 @@ for (const [file, page] of pages) {
 }
 
 const draughtsSql = await readFile(path.join(root, "supabase/live-draughts-moves.sql"), "utf8").catch(() => "");
-if (!/if case\\s+when jsonb_typeof\\(v_board\\) = 'array' then jsonb_array_length\\(v_board\\) <> 64\\s+else true\\s+end then/i.test(draughtsSql)) fail("Draughts board validation must type-check before measuring array length");
+if (!/if case\s+when jsonb_typeof\(v_board\) = 'array' then jsonb_array_length\(v_board\) <> 64\s+else true\s+end then/i.test(draughtsSql)) fail("Draughts board validation must type-check before measuring array length");
 if (draughtsSql.includes("coalesce(jsonb_typeof(v_board), 'null') <> 'array' or jsonb_array_length(v_board) <> 64")) fail("Draughts board validation contains an unsafe JSON type/length condition");
 if (!draughtsSql.includes("if v_piece not in ('r','b','R','B')")) fail("Draughts move RPC must reject unknown saved board pieces");
 if (!draughtsSql.includes("if v_turn not in ('r','b')")) fail("Draughts move RPC must reject an invalid saved turn");
 if (!draughtsSql.includes("jsonb_typeof(v_moves) is distinct from 'array'")) fail("Draughts move RPC must reject malformed saved move history");
 if (!draughtsSql.includes("if p_room_code is null or p_room_code !~ '^[A-Za-z0-9]{6}$' then")) fail("Draughts move RPC must validate room-code input");
 if (!draughtsSql.includes("if p_from is null or p_to is null")) fail("Draughts move RPC must reject null board-square inputs");
-if ((draughtsSql.match(/create or replace function public\\.submit_draughts_move\\(/g) ?? []).length !== 1) fail("Draughts SQL migration must contain exactly one move RPC definition");
+if ((draughtsSql.match(/create or replace function public\.submit_draughts_move\(/g) ?? []).length !== 1) fail("Draughts SQL migration must contain exactly one move RPC definition");
 if (!draughtsSql.trimEnd().endsWith("grant execute on function public.submit_draughts_move(text,integer,integer) to authenticated;")) fail("Draughts SQL migration has unexpected trailing content");
 
 const chessHtml = pages.get("multiplayer-chess.html")?.source ?? "";
