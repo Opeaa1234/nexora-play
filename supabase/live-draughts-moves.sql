@@ -21,6 +21,7 @@ declare
   v_must_capture boolean := false;
   v_has_jump boolean := false;
   v_king boolean;
+  v_moving_king boolean;
   v_red boolean;
   v_dr integer;
   v_dc integer;
@@ -89,6 +90,7 @@ begin
 
   v_red := v_turn = 'r';
   v_king := v_piece = upper(v_piece);
+  v_moving_king := v_king;
   v_r := p_from / 8; v_c := p_from % 8;
   v_tr := p_to / 8; v_tc := p_to % 8;
   if abs(v_tr-v_r) <> abs(v_tc-v_c) then raise exception 'Draughts pieces move diagonally.'; end if;
@@ -102,7 +104,7 @@ begin
     v_capture := v_mid;
   else
     for idx in 0..63 loop
-      if b[idx+1] is not null and lower(b[idx+1]) = v_turn then
+      if b[idx+1] is not null and lower(b[idx+1]) = v_turn and (v_forced is null or idx = v_forced) then
         rr := idx/8; cc := idx%8; v_king := b[idx+1] = upper(b[idx+1]);
         for dr in -1..1 loop
           for dc in -1..1 loop
@@ -121,6 +123,7 @@ begin
         end loop;
       end if;
     end loop;
+    v_king := v_moving_king;
     if v_must_capture then raise exception 'A capture is available and must be taken.'; end if;
   end if;
 
