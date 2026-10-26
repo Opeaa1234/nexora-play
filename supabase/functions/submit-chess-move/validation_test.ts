@@ -48,7 +48,7 @@ Deno.test("detects checkmate and rejects moves after the game ends", () => {
   );
 });
 
-Deno.test("requires an explicit promotion piece in stored UCI history", () => {
+Deno.test("rejects malformed UCI notation in stored history", () => {
   assert.throws(
     () => validateAndApplyChessMove(["a7a8"], "e2e4", "w"),
     (error: unknown) => error instanceof ChessMoveValidationError && error.status === 409,
