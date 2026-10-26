@@ -1,5 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { Chess } from "npm:chess.js@1.4.0";
+import { ChessMoveValidationError, validateAndApplyChessMove } from "./validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -59,49 +59,27 @@ Deno.serve(async (req: Request) => {
     return reply(403, { error: "You are not a player in this room." });
   }
 
-  const moves = Array.isArray(room.game_state?.moves) ? room.game_state.moves : [];
-  const game = new Chess();
+  let validated;
   try {
-    for (const raw of moves) {
-      if (typeof raw !== "string" || !/^[a-h][1-8][a-h][1-8][qrbn]?$/.test(raw)) {
-        return reply(409, { error: "The saved chess history is malformed. Ask the room host to report this room." });
-      }
-      const replayed = game.move({
-        from: raw.slice(0, 2),
-        to: raw.slice(2, 4),
-        ...(raw[4] ? { promotion: raw[4] } : {}),
-      });
-      if (!replayed || replayed.from + replayed.to + (replayed.promotion || "") !== raw) {
-        return reply(409, { error: "The saved chess history contains an illegal move." });
-      }
+    validated = validateAndApplyChessMove(
+      room.game_state?.moves ?? [],
+      move,
+      authData.user.id === room.host_id ? "w" : "b",
+    );
+  } catch (error) {
+    if (error instanceof ChessMoveValidationError) {
+      return reply(error.status, { error: error.message });
     }
-  } catch {
-    return reply(409, { error: "The saved chess history cannot be replayed." });
-  }
-  if (game.isGameOver()) return reply(409, { error: "This chess game has already ended." });
-  if ((game.turn() === "w" && authData.user.id !== room.host_id) || (game.turn() === "b" && authData.user.id !== room.guest_id)) {
-    return reply(403, { error: "It is not your turn." });
+    return reply(400, { error: "The chess move could not be validated." });
   }
 
-  const from = move.slice(0, 2);
-  const to = move.slice(2, 4);
-  let played;
-  try {
-    played = game.move({ from, to, ...(move[4] ? { promotion: move[4] } : {}) });
-  } catch {
-    return reply(400, { error: "That is not a legal chess move." });
-  }
-  if (!played || played.from + played.to + (played.promotion || "") !== move) {
-    return reply(400, { error: "That is not a legal chess move. Include a promotion piece when required." });
-  }
-
-  const expectedMoves = moves;
-  const nextMoves = [...moves, move];
-  const ended = game.isGameOver();
-  const result = game.isCheckmate() ? (game.turn() === "w" ? "0-1" : "1-0") : game.isDraw() ? "1/2-1/2" : null;
+  const expectedMoves = Array.isArray(room.game_state?.moves) ? room.game_state.moves : [];
+  const nextMoves = validated.nextMoves;
+  const ended = validated.status === "finished";
+  const result = validated.result;
   const nextState = {
     version: 1,
-    stage: ended ? "finished" : "playing",
+    stage: validated.status,
     moves: nextMoves,
     result,
   };
