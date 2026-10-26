@@ -79,6 +79,9 @@ Deno.serve(async (req: Request) => {
     return reply(409, { error: "The saved chess history cannot be replayed." });
   }
   if (game.isGameOver()) return reply(409, { error: "This chess game has already ended." });
+  if ((game.turn() === "w" && authData.user.id !== room.host_id) || (game.turn() === "b" && authData.user.id !== room.guest_id)) {
+    return reply(403, { error: "It is not your turn." });
+  }
 
   const from = move.slice(0, 2);
   const to = move.slice(2, 4);
