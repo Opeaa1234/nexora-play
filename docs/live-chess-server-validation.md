@@ -6,7 +6,7 @@ This change keeps live chess moves on the server-validated path. Do not enable i
 
 - `supabase/functions/submit-chess-move/index.ts`: authenticates the caller, checks room membership and whose turn it is, replays saved UCI moves with `chess.js`, rejects illegal moves, and submits a compare-and-swap update.
 - `supabase/live-chess-moves.sql`: removes the old client-callable RPC and installs a service-role-only RPC. The RPC locks the room and rejects stale histories so simultaneous requests cannot overwrite one another.
-- `multiplayer-chess.html`: sends moves through the Edge Function rather than calling the database RPC directly.
+- `multiplayer-chess.html`: sends moves through the Edge Function rather than calling the database RPC directly, and offers explicit queen/rook/bishop/knight promotion choices.
 
 ## Required deployment order
 
