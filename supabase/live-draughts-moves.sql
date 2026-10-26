@@ -45,7 +45,8 @@ declare
   v_winner text := null;
 begin
   if v_user is null then raise exception 'Sign in to play.'; end if;
-  if p_room_code is null or p_room_code !~ '^[A-Za-z0-9]{6}
+  if p_room_code is null or p_room_code !~ '^[A-Za-z0-9]{6}    raise exception 'Invalid board square.';
+  end if;
 
   select * into v_room from public.game_rooms
    where public.game_rooms.room_code = upper(trim(p_room_code))
