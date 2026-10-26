@@ -63,6 +63,8 @@ if (draughtsSql.includes("coalesce(jsonb_typeof(v_board), 'null') <> 'array' or 
 if (!draughtsSql.includes("if v_piece not in ('r','b','R','B')")) fail("Draughts move RPC must reject unknown saved board pieces");
 if (!draughtsSql.includes("if v_turn not in ('r','b')")) fail("Draughts move RPC must reject an invalid saved turn");
 if (!draughtsSql.includes("jsonb_typeof(v_moves) is distinct from 'array'")) fail("Draughts move RPC must reject malformed saved move history");
+if (!draughtsSql.includes("p_room_code is null or p_room_code !~")) fail("Draughts move RPC must validate room-code input");
+if (!draughtsSql.includes("p_from is null or p_to is null")) fail("Draughts move RPC must reject null board-square inputs");
 
 const chessHtml = pages.get("multiplayer-chess.html")?.source ?? "";
 const chessSql = await readFile(path.join(root, "supabase/live-chess-moves.sql"), "utf8").catch(() => "");
