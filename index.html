@@ -83,7 +83,7 @@ footer{border-color:#1b3b66;background:#040918}.toast{background:#dffaff;color:#
   let toastTimer;
   function showToast(message){const toast=document.getElementById('toast');toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),3000)}
   document.querySelectorAll('.demo').forEach(button=>button.addEventListener('click',()=>{window.location.href='./games.html'}));
-  document.getElementById('mobileBtn').addEventListener('click',()=>window.location.href='./games.html');
+  // The mobile section points to the browser-game collection until a real mobile catalogue exists.
   const menuBtn=document.getElementById('menuBtn');const navlinks=document.getElementById('navlinks');
   menuBtn.addEventListener('click',()=>{const open=navlinks.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open))});
   navlinks.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{navlinks.classList.remove('open');menuBtn.setAttribute('aria-expanded','false')}));
