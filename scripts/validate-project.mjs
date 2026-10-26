@@ -79,6 +79,21 @@ if (!chessSql.includes("grant execute on function public.submit_validated_chess_
 if (!chessSql.includes("from public, anon, authenticated")) fail("Chess move RPC must revoke client execution privileges");
 if (chessSql.includes("create or replace function public.submit_chess_move")) fail("Retired client-callable chess RPC must not be recreated");
 
+
+const roomSql = await readFile(path.join(root, "supabase/game-rooms.sql"), "utf8").catch(() => "");
+const joinSql = await readFile(path.join(root, "supabase/secure-room-joining.sql"), "utf8").catch(() => "");
+if (!roomSql.includes("alter table public.game_rooms enable row level security")) fail("Game rooms table must enable row-level security");
+if (!roomSql.includes("host_id = (select auth.uid()) and guest_id is null and status = 'waiting'")) fail("Room creation policy must bind new rooms to the authenticated host");
+if (!joinSql.includes("revoke update on table public.game_rooms from authenticated")) fail("Clients must not directly update game room records after secure room joining is installed");
+if (!joinSql.includes("security definer") || !joinSql.includes("set search_path = ''")) fail("Atomic room-join RPC must be SECURITY DEFINER with an empty search_path");
+if (!joinSql.includes("v_user_id := auth.uid()")) fail("Room-join RPC must require an authenticated caller");
+if (!joinSql.includes("for update")) fail("Room-join RPC must lock the room row to prevent simultaneous joins");
+if (!joinSql.includes("v_room.status <> 'waiting'")) fail("Room-join RPC must reject rooms that are no longer waiting");
+if (!joinSql.includes("grant execute on function public.join_game_room(text) to authenticated")) fail("Room-join RPC must be executable by signed-in players");
+if (!draughtsSql.includes("v_user <> v_room.host_id and v_user <> v_room.guest_id")) fail("Draughts move RPC must reject non-player accounts");
+if (!draughtsSql.includes("It is not your turn.")) fail("Draughts move RPC must enforce turn ownership");
+if (!chessSql.includes("v_current_moves is distinct from p_expected_moves")) fail("Chess move RPC must compare-and-swap against the current move history");
+
 if (errors.length) {
   console.error("Nexora Play validation failed:");
   for (const error of errors) console.error(` - ${error}`);
