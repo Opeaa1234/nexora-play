@@ -151,6 +151,9 @@ begin
       end if;
     end loop;
     v_king := v_moving_king;
+    if v_forced is not null and not v_must_capture then
+      raise exception 'Saved multi-jump state has no available continuation.';
+    end if;
     if v_must_capture then raise exception 'A capture is available and must be taken.'; end if;
   end if;
 
