@@ -69,6 +69,20 @@ Deno.test("rejects malformed UCI input", () => {
   );
 });
 
+Deno.test("requires an explicit promotion piece and preserves the chosen piece", () => {
+  const history = [
+    "a2a4", "b7b5", "a4b5", "h7h6",
+    "b5b6", "h6h5", "b6b7", "h5h4",
+  ];
+  assert.throws(
+    () => validateAndApplyChessMove(history, "b7b8", "w"),
+    (error: unknown) => error instanceof ChessMoveValidationError && error.status === 400,
+  );
+  const promoted = validateAndApplyChessMove(history, "b7b8n", "w");
+  assert.equal(promoted.nextMoves.at(-1), "b7b8n");
+  assert.equal(promoted.status, "playing");
+});
+
 Deno.test("detects a threefold-repetition draw", () => {
   const history = [
     "g1f3", "g8f6", "f3g1", "f6g8",
