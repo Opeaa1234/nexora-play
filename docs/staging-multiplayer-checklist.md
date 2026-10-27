@@ -36,7 +36,7 @@ You can deploy from a trusted local terminal, or use the guarded GitHub Actions 
 **GitHub Actions setup (one-time):**
 1. In the repository's Settings → Secrets and variables → Actions, add `SUPABASE_ACCESS_TOKEN` (a Supabase personal access token) and `SUPABASE_STAGING_PROJECT_REF` (the staging project's 20-character project ref). Never use production credentials for these secrets.
 2. In Settings → Environments, create the `staging` environment and optionally require reviewer approval before deployments.
-3. Open Actions → **Deploy Chess Edge Function to Supabase Staging** → Run workflow, selecting `redevelopment/phase-2-homepage`. The workflow refuses to run from other branches and fails early if either secret is missing.
+3. Open Actions → **Deploy Chess Edge Function to Supabase Staging** → Run workflow, selecting `redevelopment/phase-2-homepage`. The workflow refuses to run from other branches and fails early if either secret is missing. It now runs the repository static validator, type-checks the Edge Function, and executes Chess validation tests before it attempts deployment; any failed check blocks deployment.
 
 **Local CLI alternative:**
 
