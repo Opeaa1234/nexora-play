@@ -77,7 +77,7 @@ const validation = await readFile(path.join(root, "supabase/functions/submit-che
 if (!chessHtml.includes("functions.invoke('submit-chess-move'")) fail("multiplayer-chess.html must submit moves through the submit-chess-move Edge Function");
 if (!chessHtml.includes("async function explainMoveError(error)")) fail("Chess UI must surface actionable server-side move validation errors");
 if (!chessHtml.includes('role="status" aria-live="polite"')) fail("Chess UI must announce changing turn and match status to screen readers");
-if (!chessHtml.includes("white \' : \'black")) fail("Chess squares must announce piece color and type to screen readers");
+if (!chessHtml.includes("p.color==='w'?'white ':'black '")) fail("Chess squares must announce piece color and type to screen readers");
 if (chessHtml.includes("rpc('submit_chess_move'")) fail("multiplayer-chess.html still calls the retired client-side chess RPC");
 if (!validation.includes('npm:chess.js@1.4.0')) fail("Chess validation module must use chess.js to validate moves");
 if (!validation.includes("It is not your turn.")) fail("Chess validation module must enforce turn order");
