@@ -101,6 +101,7 @@ if (!draughtsHtml.includes('role="status" aria-live="polite"')) fail("Live Draug
 if (!draughtsHtml.includes("This room is active but its saved Draughts board is missing.")) fail("Live Draughts must not silently reset an active room with missing saved board state");
 if (!draughtsHtml.includes("Saved Draughts board is malformed.")) fail("Live Draughts must reject malformed saved board data before rendering");
 if (!draughtsHtml.includes("Saved Draughts turn is malformed.")) fail("Live Draughts must reject malformed saved turn data");
+if (!draughtsHtml.includes("Saved Draughts continuation square is malformed.")) fail("Live Draughts must reject malformed multi-jump continuation state");
 if (!draughtsHtml.includes("syncVersion=0") || !draughtsHtml.includes("if(request!==syncVersion)return")) fail("Live Draughts refreshes must ignore stale overlapping room reads");
 if (!chessHtml.includes("syncVersion=0") || !chessHtml.includes("if(request!==syncVersion)return")) fail("Live Chess refreshes must ignore stale overlapping room reads");
 
