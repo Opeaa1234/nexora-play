@@ -29,7 +29,15 @@ Deno.serve(async (req: Request) => {
     global: { headers: { Authorization: authorization } },
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const { data: authData, error: authError } = await userClient.auth.getUser();
+  let authData;
+  let authError;
+  try {
+    const authResult = await userClient.auth.getUser();
+    authData = authResult.data;
+    authError = authResult.error;
+  } catch {
+    return reply(503, { error: "Could not verify your session right now. Try again." });
+  }
   if (authError || !authData.user) return reply(401, { error: "Your session is invalid. Sign in again." });
 
   let body: unknown;
@@ -50,11 +58,19 @@ Deno.serve(async (req: Request) => {
   const admin = createClient(url, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const { data: room, error: roomError } = await admin
-    .from("game_rooms")
-    .select("id, room_code, host_id, guest_id, status, game_type, game_state")
-    .eq("room_code", roomCode)
-    .maybeSingle();
+  let room;
+  let roomError;
+  try {
+    const roomResult = await admin
+      .from("game_rooms")
+      .select("id, room_code, host_id, guest_id, status, game_type, game_state")
+      .eq("room_code", roomCode)
+      .maybeSingle();
+    room = roomResult.data;
+    roomError = roomResult.error;
+  } catch {
+    return reply(503, { error: "Could not reach the chess room service. Try again." });
+  }
   if (roomError) return reply(500, { error: "Could not load the chess room." });
   if (!room) return reply(404, { error: "Room not found." });
   if (room.game_type !== "chess") return reply(400, { error: "This room is not a chess room." });
@@ -87,13 +103,19 @@ Deno.serve(async (req: Request) => {
     moves: nextMoves,
     result,
   };
-  const { error: saveError } = await admin.rpc("submit_validated_chess_move", {
-    p_room_code: roomCode,
-    p_move: move,
-    p_expected_moves: expectedMoves,
-    p_next_state: nextState,
-    p_next_status: ended ? "finished" : "playing",
-  });
+  let saveError;
+  try {
+    const saveResult = await admin.rpc("submit_validated_chess_move", {
+      p_room_code: roomCode,
+      p_move: move,
+      p_expected_moves: expectedMoves,
+      p_next_state: nextState,
+      p_next_status: ended ? "finished" : "playing",
+    });
+    saveError = saveResult.error;
+  } catch {
+    return reply(503, { error: "Could not reach the chess save service. Refresh and check the game state." });
+  }
   if (saveError) {
     const conflict = /position changed/i.test(saveError.message || "");
     return reply(conflict ? 409 : 500, { error: conflict ? "The position changed. Refresh and try again." : "The server could not save this move. Refresh and try again." });
