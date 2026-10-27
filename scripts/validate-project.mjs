@@ -56,6 +56,9 @@ for (const [file, page] of pages) {
 
 const draughtsSql = await readFile(path.join(root, "supabase/live-draughts-moves.sql"), "utf8").catch(() => "");
 if (!draughtsSql.includes("if not (v_room.game_state ? 'board') then")) fail("Draughts may initialize a board only when saved state has no board key");
+if (!/if jsonb_array_length\(v_board\) <> 64 then[\s\S]*?end if;\s*for idx in 0\.\.63 loop/i.test(draughtsSql)) fail("Draughts SQL must terminate the board-length guard before iterating squares");
+if (!draughtsSql.includes("v_room.game_type is distinct from 'draughts'")) fail("Draughts RPC must reject null or incorrect room types");
+if (!draughtsSql.includes("v_room.status is distinct from 'playing'")) fail("Draughts RPC must reject null or non-playing room status");
 if (!/if jsonb_typeof\(v_board\) is distinct from 'array' then[\s\S]*?if jsonb_array_length\(v_board\) <> 64 then/i.test(draughtsSql)) fail("Draughts RPC must type-check saved boards before measuring their length");
 if (!draughtsSql.includes("Saved Draughts state has move history but no board.")) fail("Draughts RPC must reject move history that has lost its board");
 if (!draughtsSql.includes("if v_piece not in ('r','b','R','B')")) fail("Draughts move RPC must reject unknown saved board pieces");
@@ -102,6 +105,8 @@ if (!joinSql.includes("grant execute on function public.join_game_room(text) to 
 if (!draughtsSql.includes("v_user <> v_room.host_id and v_user <> v_room.guest_id")) fail("Draughts move RPC must reject non-player accounts");
 if (!draughtsSql.includes("It is not your turn.")) fail("Draughts move RPC must enforce turn ownership");
 if (!chessSql.includes("v_current_moves is distinct from p_expected_moves")) fail("Chess move RPC must compare-and-swap against the current move history");
+if (!chessSql.includes("v_room.game_type is distinct from 'chess'")) fail("Chess RPC must reject null or incorrect room types");
+if (!chessSql.includes("v_room.status is distinct from 'playing'")) fail("Chess RPC must reject null or non-playing room status");
 
 if (errors.length) {
   console.error("Nexora Play validation failed:");
