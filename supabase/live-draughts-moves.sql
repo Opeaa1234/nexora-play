@@ -64,10 +64,11 @@ begin
   if v_user <> v_room.host_id and v_user <> v_room.guest_id then raise exception 'You are not a player in this room.'; end if;
 
   v_board := v_room.game_state->'board';
-  if case
-       when jsonb_typeof(v_board) = 'array' then jsonb_array_length(v_board) <> 64
-       else true
-     end then
+  if not (v_room.game_state ? 'board') then
+    -- Only a new room may initialize a board. Never silently reset saved state.
+    if coalesce(v_room.game_state->'moves', '[]'::jsonb) <> '[]'::jsonb then
+      raise exception 'Saved Draughts state has move history but no board.';
+    end if;
     for idx in 0..63 loop
       if ((idx / 8 + idx % 8) % 2) = 1 then
         if idx / 8 < 3 then b[idx+1] := 'b';
@@ -79,6 +80,9 @@ begin
     v_forced := null;
     v_moves := '[]'::jsonb;
   else
+    if jsonb_typeof(v_board) is distinct from 'array' or jsonb_array_length(v_board) <> 64 then
+      raise exception 'Saved Draughts board must contain exactly 64 squares.';
+    end if
     for idx in 0..63 loop
       if jsonb_typeof(v_board->idx) is distinct from 'null' then
         v_piece := v_board->>idx;
