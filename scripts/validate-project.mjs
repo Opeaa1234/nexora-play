@@ -90,6 +90,11 @@ if (!chessSql.includes("from public, anon, authenticated")) fail("Chess move RPC
 if (chessSql.includes("create or replace function public.submit_chess_move")) fail("Retired client-callable chess RPC must not be recreated");
 
 
+const draughtsHtml = pages.get("multiplayer-draughts.html")?.source ?? "";
+if (!draughtsHtml.includes(".sq:focus-visible")) fail("Live Draughts board must show a visible keyboard focus indicator");
+if (!draughtsHtml.includes("const square=String.fromCharCode(97+i%8)+(8-Math.floor(i/8))")) fail("Live Draughts squares must use standard coordinates in accessible labels");
+if (!draughtsHtml.includes("p===p.toUpperCase()?'king':'man'")) fail("Live Draughts square labels must announce piece type");
+
 const roomsHtml = pages.get("rooms.html")?.source ?? "";
 if (!roomsHtml.includes("data-open=") || !roomsHtml.includes("data-join=")) fail("Open rooms list must provide separate host-open and guest-join actions");
 if (!roomsHtml.includes("multiplayer-draughts.html") || !roomsHtml.includes("multiplayer-chess.html")) fail("Room actions must route to the selected multiplayer game");
