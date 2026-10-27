@@ -32,7 +32,7 @@ begin
   if v_room.host_id = v_user_id then
     raise exception 'You are the host of this room.';
   end if;
-  if v_room.status <> 'waiting' then
+  if v_room.status is distinct from 'waiting' then
     raise exception 'This room is no longer waiting for a player.';
   end if;
   if v_room.guest_id is not null and v_room.guest_id <> v_user_id then
