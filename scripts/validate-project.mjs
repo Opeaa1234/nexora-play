@@ -131,6 +131,7 @@ if (!draughtsSql.includes("grant execute on function public.submit_draughts_move
 if (!draughtsSql.includes("if (v_turn = 'r' and v_user <> v_room.host_id) or (v_turn = 'b' and v_user <> v_room.guest_id) then")) fail("Draughts move RPC must bind turns to the host and guest roles");
 
 if (!draughtsSql.includes("It is not your turn.")) fail("Draughts move RPC must enforce turn ownership");
+if (!draughtsSql.includes("Saved Draughts continuation square does not contain the current player piece.")) fail("Draughts RPC must reject stale or opponent-owned multi-jump continuation squares");
 if (!chessSql.includes("v_current_moves is distinct from p_expected_moves")) fail("Chess move RPC must compare-and-swap against the current move history");
 if (!chessSql.includes("v_room.game_type is distinct from 'chess'")) fail("Chess RPC must reject null or incorrect room types");
 if (!chessSql.includes("v_room.status is distinct from 'playing'")) fail("Chess RPC must reject null or non-playing room status");
