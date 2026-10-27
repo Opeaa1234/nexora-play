@@ -109,6 +109,11 @@ if (!joinSql.includes("for update")) fail("Room-join RPC must lock the room row 
 if (!joinSql.includes("v_room.status is distinct from 'waiting'")) fail("Room-join RPC must reject null or non-waiting room status");
 if (!joinSql.includes("grant execute on function public.join_game_room(text) to authenticated")) fail("Room-join RPC must be executable by signed-in players");
 if (!draughtsSql.includes("v_user <> v_room.host_id and v_user <> v_room.guest_id")) fail("Draughts move RPC must reject non-player accounts");
+if (!/create or replace function public\\.submit_draughts_move\\([\\s\\S]*?security definer[\\s\\S]*?set search_path = ''/i.test(draughtsSql)) fail("Draughts move RPC must be SECURITY DEFINER with an empty search_path");
+if (!draughtsSql.includes("revoke all on function public.submit_draughts_move(text,integer,integer) from public, anon")) fail("Draughts move RPC must revoke execution from public and anonymous users");
+if (!draughtsSql.includes("grant execute on function public.submit_draughts_move(text,integer,integer) to authenticated")) fail("Draughts move RPC must explicitly grant execution to authenticated players");
+if (!draughtsSql.includes("if (v_turn = 'r' and v_user <> v_room.host_id) or (v_turn = 'b' and v_user <> v_room.guest_id) then")) fail("Draughts move RPC must bind turns to the host and guest roles");
+
 if (!draughtsSql.includes("It is not your turn.")) fail("Draughts move RPC must enforce turn ownership");
 if (!chessSql.includes("v_current_moves is distinct from p_expected_moves")) fail("Chess move RPC must compare-and-swap against the current move history");
 if (!chessSql.includes("v_room.game_type is distinct from 'chess'")) fail("Chess RPC must reject null or incorrect room types");
