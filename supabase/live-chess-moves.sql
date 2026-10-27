@@ -50,8 +50,8 @@ begin
   for update;
 
   if not found then raise exception 'Room not found.'; end if;
-  if v_room.game_type <> 'chess' then raise exception 'This room is not a chess room.'; end if;
-  if v_room.status <> 'playing' or v_room.guest_id is null then
+  if v_room.game_type is distinct from 'chess' then raise exception 'This room is not a chess room.'; end if;
+  if v_room.status is distinct from 'playing' or v_room.guest_id is null then
     raise exception 'This chess room is not currently playing.';
   end if;
 
