@@ -97,7 +97,7 @@ if (!joinSql.includes("revoke update on table public.game_rooms from authenticat
 if (!joinSql.includes("security definer") || !joinSql.includes("set search_path = ''")) fail("Atomic room-join RPC must be SECURITY DEFINER with an empty search_path");
 if (!/v_user_id\s+uuid\s*:=\s*auth\.uid\(\)/i.test(joinSql)) fail("Room-join RPC must require an authenticated caller");
 if (!joinSql.includes("for update")) fail("Room-join RPC must lock the room row to prevent simultaneous joins");
-if (!joinSql.includes("v_room.status <> 'waiting'")) fail("Room-join RPC must reject rooms that are no longer waiting");
+if (!joinSql.includes("v_room.status is distinct from 'waiting'")) fail("Room-join RPC must reject null or non-waiting room status");
 if (!joinSql.includes("grant execute on function public.join_game_room(text) to authenticated")) fail("Room-join RPC must be executable by signed-in players");
 if (!draughtsSql.includes("v_user <> v_room.host_id and v_user <> v_room.guest_id")) fail("Draughts move RPC must reject non-player accounts");
 if (!draughtsSql.includes("It is not your turn.")) fail("Draughts move RPC must enforce turn ownership");
