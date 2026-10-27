@@ -76,6 +76,9 @@ if (!validation.includes('npm:chess.js@1.4.0')) fail("Chess validation module mu
 if (!validation.includes("It is not your turn.")) fail("Chess validation module must enforce turn order");
 if (!edge.includes("auth.getUser()")) fail("Chess Edge Function must authenticate the caller");
 if (!edge.includes("body === null || typeof body !== \"object\" || Array.isArray(body)")) fail("Chess Edge Function must reject non-object JSON request bodies");
+if (!edge.includes("Could not verify your session right now. Try again.")) fail("Chess Edge Function must handle thrown authentication-service failures");
+if (!edge.includes("Could not reach the chess room service. Try again.")) fail("Chess Edge Function must handle thrown room-query failures");
+if (!edge.includes("Could not reach the chess save service. Refresh and check the game state.")) fail("Chess Edge Function must handle thrown move-save failures");
 if (!edge.includes("submit_validated_chess_move")) fail("Chess Edge Function must persist through the restricted atomic RPC");
 if (!chessSql.includes("grant execute on function public.submit_validated_chess_move") || !chessSql.includes("to service_role")) fail("Chess move RPC must be restricted to service_role");
 if (!chessSql.includes("from public, anon, authenticated")) fail("Chess move RPC must revoke client execution privileges");
