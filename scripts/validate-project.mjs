@@ -108,6 +108,8 @@ if (!chessHtml.includes("syncVersion=0") || !chessHtml.includes("if(request!==sy
 const roomsHtml = pages.get("rooms.html")?.source ?? "";
 if (!roomsHtml.includes("data-open=") || !roomsHtml.includes("data-join=")) fail("Open rooms list must provide separate host-open and guest-join actions");
 if (!roomsHtml.includes("multiplayer-draughts.html") || !roomsHtml.includes("multiplayer-chess.html")) fail("Room actions must route to the selected multiplayer game");
+if (!roomsHtml.includes("function initialDraughtsState()")) fail("New Draughts rooms must persist a valid initial board before the guest joins");
+if (!roomsHtml.includes("gameType==='draughts'?initialDraughtsState():{version:1,stage:'waiting',moves:[]}")) fail("New rooms must initialize Draughts boards and Chess move histories before becoming active");
 if (roomsHtml.includes("Room hosting and joining will be enabled after the database setup is completed.")) fail("Room lobby must not display a stale disabled-feature message after setup");
 
 const roomSql = await readFile(path.join(root, "supabase/game-rooms.sql"), "utf8").catch(() => "");
