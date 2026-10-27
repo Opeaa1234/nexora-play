@@ -32,14 +32,18 @@ Deno.serve(async (req: Request) => {
   const { data: authData, error: authError } = await userClient.auth.getUser();
   if (authError || !authData.user) return reply(401, { error: "Your session is invalid. Sign in again." });
 
-  let body: { roomCode?: unknown; move?: unknown };
+  let body: unknown;
   try {
     body = await req.json();
   } catch {
     return reply(400, { error: "Request body must be valid JSON." });
   }
-  const roomCode = typeof body.roomCode === "string" ? body.roomCode.trim().toUpperCase() : "";
-  const move = typeof body.move === "string" ? body.move.trim().toLowerCase() : "";
+  if (body === null || typeof body !== "object" || Array.isArray(body)) {
+    return reply(400, { error: "Request body must be a JSON object." });
+  }
+  const payload = body as { roomCode?: unknown; move?: unknown };
+  const roomCode = typeof payload.roomCode === "string" ? payload.roomCode.trim().toUpperCase() : "";
+  const move = typeof payload.move === "string" ? payload.move.trim().toLowerCase() : "";
   if (!/^[A-Z0-9]{6}$/.test(roomCode)) return reply(400, { error: "Invalid room code." });
   if (!/^[a-h][1-8][a-h][1-8][qrbn]?$/.test(move)) return reply(400, { error: "Invalid move format." });
 
