@@ -31,12 +31,21 @@ If any SQL fails, stop and resolve the error before testing the browser. Do not 
 
 ## 3. Deploy the Chess Edge Function
 
-From the repository root, link the Supabase CLI to the staging project and deploy:
+You can deploy from a trusted local terminal, or use the guarded GitHub Actions workflow `.github/workflows/deploy-staging-chess.yml`:
+
+**GitHub Actions setup (one-time):**
+1. In the repository's Settings → Secrets and variables → Actions, add `SUPABASE_ACCESS_TOKEN` (a Supabase personal access token) and `SUPABASE_STAGING_PROJECT_REF` (the staging project's 20-character project ref). Never use production credentials for these secrets.
+2. In Settings → Environments, create the `staging` environment and optionally require reviewer approval before deployments.
+3. Open Actions → **Deploy Chess Edge Function to Supabase Staging** → Run workflow, selecting `redevelopment/phase-2-homepage`. The workflow refuses to run from other branches and fails early if either secret is missing.
+
+**Local CLI alternative:**
 
 ```sh
 supabase link --project-ref YOUR_STAGING_PROJECT_REF
-supabase functions deploy submit-chess-move
+supabase functions deploy submit-chess-move --project-ref YOUR_STAGING_PROJECT_REF
 ```
+
+The workflow deploys only the Chess Edge Function; it does not apply SQL migrations. Apply and verify the SQL files manually in the order above before gameplay testing.
 
 Confirm the function has the standard Supabase environment variables `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`. The service-role key must remain server-side. Review function logs after each negative test below.
 
