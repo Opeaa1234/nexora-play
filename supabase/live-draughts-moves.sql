@@ -59,8 +59,8 @@ begin
    where public.game_rooms.room_code = upper(trim(p_room_code))
    for update;
   if not found then raise exception 'Room not found.'; end if;
-  if v_room.game_type <> 'draughts' then raise exception 'This room is not a Draughts room.'; end if;
-  if v_room.status <> 'playing' or v_room.guest_id is null then raise exception 'Waiting for the second player.'; end if;
+  if v_room.game_type is distinct from 'draughts' then raise exception 'This room is not a Draughts room.'; end if;
+  if v_room.status is distinct from 'playing' or v_room.guest_id is null then raise exception 'Waiting for the second player.'; end if;
   if v_user <> v_room.host_id and v_user <> v_room.guest_id then raise exception 'You are not a player in this room.'; end if;
 
   v_board := v_room.game_state->'board';
@@ -85,7 +85,7 @@ begin
     end if;
     if jsonb_array_length(v_board) <> 64 then
       raise exception 'Saved Draughts board must contain exactly 64 squares.';
-    end if
+    end if;
     for idx in 0..63 loop
       if jsonb_typeof(v_board->idx) is distinct from 'null' then
         v_piece := v_board->>idx;
