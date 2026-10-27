@@ -72,7 +72,7 @@ Deno.test("rejects malformed UCI input", () => {
 Deno.test("requires an explicit promotion piece and preserves the chosen piece", () => {
   const history = [
     "a2a4", "b7b5", "a4b5", "h7h6",
-    "b5b6", "h6h5", "b6b7", "h5h4",
+    "b5b6", "b8c6", "b6b7", "h6h5",
   ];
   assert.throws(
     () => validateAndApplyChessMove(history, "b7b8", "w"),
