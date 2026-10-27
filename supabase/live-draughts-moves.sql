@@ -101,6 +101,9 @@ begin
     if v_forced is not null and v_forced not between 0 and 63 then
       raise exception 'Saved Draughts continuation square is invalid.';
     end if;
+    if v_forced is not null and (b[v_forced+1] is null or lower(b[v_forced+1]) <> v_turn) then
+      raise exception 'Saved Draughts continuation square does not contain the current player piece.';
+    end if;
     v_moves := coalesce(v_room.game_state->'moves','[]'::jsonb);
     if jsonb_typeof(v_moves) is distinct from 'array' then
       raise exception 'Saved Draughts move history is invalid.';
