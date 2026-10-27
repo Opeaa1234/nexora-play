@@ -80,7 +80,10 @@ begin
     v_forced := null;
     v_moves := '[]'::jsonb;
   else
-    if jsonb_typeof(v_board) is distinct from 'array' or jsonb_array_length(v_board) <> 64 then
+    if jsonb_typeof(v_board) is distinct from 'array' then
+      raise exception 'Saved Draughts board must be a JSON array.';
+    end if;
+    if jsonb_array_length(v_board) <> 64 then
       raise exception 'Saved Draughts board must contain exactly 64 squares.';
     end if
     for idx in 0..63 loop
