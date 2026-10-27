@@ -85,6 +85,10 @@ const roomSql = await readFile(path.join(root, "supabase/game-rooms.sql"), "utf8
 const joinSql = await readFile(path.join(root, "supabase/secure-room-joining.sql"), "utf8").catch(() => "");
 if (!roomSql.includes("alter table public.game_rooms enable row level security")) fail("Game rooms table must enable row-level security");
 if (!roomSql.includes("host_id = (select auth.uid()) and guest_id is null and status = 'waiting'")) fail("Room creation policy must bind new rooms to the authenticated host");
+if (!roomSql.includes("grant select, insert on public.game_rooms to authenticated")) fail("Room foundation must grant only client read and create permissions");
+if (!roomSql.includes("revoke update on public.game_rooms from authenticated")) fail("Room foundation must revoke direct client updates by default");
+if (/grant\s+[^;]*\bupdate\b[^;]*\bon\s+public\.game_rooms\s+to\s+authenticated/i.test(roomSql)) fail("Room foundation must not grant direct client updates");
+if (/create\s+policy[^;]*on\s+public\.game_rooms\s+for\s+update/i.test(roomSql)) fail("Room foundation must not create direct room-update policies");
 if (!joinSql.includes("revoke update on table public.game_rooms from authenticated")) fail("Clients must not directly update game room records after secure room joining is installed");
 if (!joinSql.includes("security definer") || !joinSql.includes("set search_path = ''")) fail("Atomic room-join RPC must be SECURITY DEFINER with an empty search_path");
 if (!/v_user_id\s+uuid\s*:=\s*auth\.uid\(\)/i.test(joinSql)) fail("Room-join RPC must require an authenticated caller");
