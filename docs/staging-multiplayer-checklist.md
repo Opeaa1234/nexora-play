@@ -29,6 +29,38 @@ Afterward verify:
 
 If any SQL fails, stop and resolve the error before testing the browser. Do not continue with a partially applied schema.
 
+### Optional SQL Editor verification
+
+Run this read-only query after all four SQL files finish. Review the rows rather than assuming that a successful migration guarantees the intended privileges:
+
+```sql
+select
+  has_table_privilege('authenticated', 'public.game_rooms', 'SELECT') as authenticated_can_read_rooms,
+  has_table_privilege('authenticated', 'public.game_rooms', 'INSERT') as authenticated_can_create_rooms,
+  has_table_privilege('authenticated', 'public.game_rooms', 'UPDATE') as authenticated_can_update_rooms,
+  has_function_privilege('authenticated', 'public.join_game_room(text)', 'EXECUTE') as authenticated_can_join,
+  has_function_privilege('anon', 'public.join_game_room(text)', 'EXECUTE') as anonymous_can_join,
+  has_function_privilege('authenticated', 'public.submit_validated_chess_move(text,text,jsonb,jsonb,text)', 'EXECUTE') as authenticated_can_call_chess_rpc,
+  has_function_privilege('service_role', 'public.submit_validated_chess_move(text,text,jsonb,jsonb,text)', 'EXECUTE') as service_role_can_call_chess_rpc,
+  has_function_privilege('authenticated', 'public.submit_draughts_move(text,integer,integer)', 'EXECUTE') as authenticated_can_submit_draughts;
+```
+
+Expected results: room SELECT and INSERT are true; room UPDATE is false; authenticated join is true; anonymous join is false; authenticated direct Chess RPC is false; service-role Chess RPC is true; authenticated Draughts RPC is true. These grants do not replace the RPCs' in-function player, turn, room-status, and move validation.
+
+Check row-level security and realtime publication membership separately:
+
+```sql
+select relrowsecurity
+from pg_class
+where oid = 'public.game_rooms'::regclass;
+
+select pubname
+from pg_publication_tables
+where schemaname = 'public' and tablename = 'game_rooms';
+```
+
+Expected: `relrowsecurity` is true and `game_rooms` appears under the `supabase_realtime` publication. If a function is absent or the privilege query errors because the signature differs, stop and reconcile the applied schema with the checked-in SQL before proceeding.
+
 ## 3. Deploy the Chess Edge Function
 
 You can deploy from a trusted local terminal, or use the guarded GitHub Actions workflow `.github/workflows/deploy-staging-chess.yml`:
