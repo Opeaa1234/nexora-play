@@ -97,6 +97,7 @@ const draughtsHtml = pages.get("multiplayer-draughts.html")?.source ?? "";
 if (!draughtsHtml.includes(".sq:focus-visible")) fail("Live Draughts board must show a visible keyboard focus indicator");
 if (!draughtsHtml.includes("const square=String.fromCharCode(97+i%8)+(8-Math.floor(i/8))")) fail("Live Draughts squares must use standard coordinates in accessible labels");
 if (!draughtsHtml.includes("p===p.toUpperCase()?'king':'man'")) fail("Live Draughts square labels must announce piece type");
+if (!draughtsHtml.includes('role="status" aria-live="polite"')) fail("Live Draughts must announce changing turn and match status to screen readers");
 if (!draughtsHtml.includes("This room is active but its saved Draughts board is missing.")) fail("Live Draughts must not silently reset an active room with missing saved board state");
 if (!draughtsHtml.includes("Saved Draughts board is malformed.")) fail("Live Draughts must reject malformed saved board data before rendering");
 if (!draughtsHtml.includes("Saved Draughts turn is malformed.")) fail("Live Draughts must reject malformed saved turn data");
