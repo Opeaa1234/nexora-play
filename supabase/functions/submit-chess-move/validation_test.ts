@@ -54,3 +54,28 @@ Deno.test("rejects illegal moves in stored history", () => {
     (error: unknown) => error instanceof ChessMoveValidationError && error.status === 409,
   );
 });
+
+Deno.test("rejects non-array saved history", () => {
+  assert.throws(
+    () => validateAndApplyChessMove(null, "e2e4", "w"),
+    (error: unknown) => error instanceof ChessMoveValidationError && error.status === 409,
+  );
+});
+
+Deno.test("rejects malformed UCI input", () => {
+  assert.throws(
+    () => validateAndApplyChessMove([], "e2-e4", "w"),
+    (error: unknown) => error instanceof ChessMoveValidationError && error.status === 400,
+  );
+});
+
+Deno.test("detects a threefold-repetition draw", () => {
+  const history = [
+    "g1f3", "g8f6", "f3g1", "f6g8",
+    "g1f3", "g8f6", "f3g1", "f6g8",
+  ];
+  const result = validateAndApplyChessMove(history.slice(0, 7), "f6g8", "b");
+  assert.deepEqual(result.nextMoves, history);
+  assert.equal(result.status, "finished");
+  assert.equal(result.result, "1/2-1/2");
+});
