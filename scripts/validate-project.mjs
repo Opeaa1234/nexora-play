@@ -75,6 +75,7 @@ if (chessHtml.includes("rpc('submit_chess_move'")) fail("multiplayer-chess.html 
 if (!validation.includes('npm:chess.js@1.4.0')) fail("Chess validation module must use chess.js to validate moves");
 if (!validation.includes("It is not your turn.")) fail("Chess validation module must enforce turn order");
 if (!edge.includes("auth.getUser()")) fail("Chess Edge Function must authenticate the caller");
+if (!edge.includes("body === null || typeof body !== \"object\" || Array.isArray(body)")) fail("Chess Edge Function must reject non-object JSON request bodies");
 if (!edge.includes("submit_validated_chess_move")) fail("Chess Edge Function must persist through the restricted atomic RPC");
 if (!chessSql.includes("grant execute on function public.submit_validated_chess_move") || !chessSql.includes("to service_role")) fail("Chess move RPC must be restricted to service_role");
 if (!chessSql.includes("from public, anon, authenticated")) fail("Chess move RPC must revoke client execution privileges");
