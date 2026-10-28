@@ -57,6 +57,8 @@ for (const [file, page] of pages) {
 const accountHtml = pages.get("account.html")?.source ?? "";
 if (!accountHtml.includes("resetPasswordForEmail(email")) fail("Account page must offer a Supabase password-recovery flow");
 if (!accountHtml.includes("event==='PASSWORD_RECOVERY'")) fail("Account page must recognize Supabase password-recovery callbacks");
+if (!accountHtml.includes("if(event==='SIGNED_IN'||event==='SIGNED_OUT'){setTimeout(()=>{void showSession(session)},0)}")) fail("Account page must defer session rendering outside the auth callback and avoid rerendering on initial-session/token-refresh events");
+if (accountHtml.includes("showSession(session)});")) fail("Account page must not synchronously load profiles inside every Supabase auth-state callback");
 if (!accountHtml.includes("new URLSearchParams(window.location.hash.slice(1)).get('type')==='recovery'")) fail("Account page must handle recovery links on initial load even if the auth event arrives early");
 if (!accountHtml.includes('supabase.auth.updateUser({password})')) fail("Account page must let players set a new password from the recovery callback");
 if (!accountHtml.includes("mode==='recovery'")) fail("Account form must provide a distinct password-recovery submission mode");
