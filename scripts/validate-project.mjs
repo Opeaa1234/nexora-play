@@ -128,7 +128,7 @@ const deployWorkflow = await readFile(path.join(root, ".github/workflows/deploy-
 if (!deployWorkflow.includes("if: github.ref == 'refs/heads/redevelopment/phase-2-homepage'")) fail("Chess Edge Function deployment must remain restricted to the reviewed redevelopment branch");
 if (!deployWorkflow.includes("environment: staging")) fail("Chess Edge Function deployment must use the staging environment");
 if (!deployWorkflow.includes("SUPABASE_STAGING_PROJECT_REF")) fail("Chess Edge Function deployment must use a staging-specific project ref");
-if (/supabase\\s+db\\s+push|supabase\\s+migration\\s+up/i.test(deployWorkflow)) fail("Staging Edge Function workflow must not apply database migrations automatically");
+if (/supabase\s+db\s+push|supabase\s+migration\s+up/i.test(deployWorkflow)) fail("Staging Edge Function workflow must not apply database migrations automatically");
 const rolloutDoc = await readFile(path.join(root, "docs/live-supabase-rollout.md"), "utf8").catch(() => "");
 if (!rolloutDoc.includes("not permission to run it automatically") || !rolloutDoc.includes("maintenance window") || !rolloutDoc.includes("does **not** apply SQL")) fail("Live Supabase rollout guide must preserve explicit production approval, maintenance-window, and SQL-separation safeguards");
 
