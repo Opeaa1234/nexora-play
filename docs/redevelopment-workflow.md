@@ -21,8 +21,8 @@ For every work cycle:
 
 - **PASS** — Work branch: `redevelopment/phase-2-homepage`.
 - **PASS** — Open draft PR: [#2](https://github.com/Opeaa1234/nexora-play/pull/2).
-- **PASS** — Latest reviewed branch commit before this ledger entry: `7ab3e971bcd15357024ec277984f983b81544923` (`docs: record current live Supabase review and release risks`). The ledger update itself creates a new commit and triggers another validation run.
-- **PASS** — Latest confirmed validation before this ledger entry: [GitHub Actions 40753423383](https://github.com/Opeaa1234/nexora-play/actions/runs/40753423383), successful for the live-review documentation commit `7ab3e971bcd15357024ec277984f983b81544923`.
+- **PASS** — Latest reviewed source/validator commit: `e64e61058d25fcc3ff40d351ef69223a732b02bd` (Draughts saved-history integrity guard).
+- **PASS** — Latest confirmed validation before this ledger entry: [GitHub Actions 40753934995](https://github.com/Opeaa1234/nexora-play/actions/runs/40753934995), successful on ledger commit `2dddb1375a49fc186faa2696dbf92d0e322361a2`. The ledger update itself will trigger a new validation run.
 - **NOT TESTED** — Full browser end-to-end tests against a separate staging backend.
 - **NOT TESTED** — Live multiplayer smoke tests after a coordinated database/function/frontend release.
 
@@ -131,6 +131,6 @@ Append a dated entry below after each meaningful work cycle:
 - Change: source review found that the Draughts SQL RPC converted a missing `game_state.moves` field into an empty array when the board was present. The RPC now rejects missing saved history, and the project validator guards against reintroducing that fallback.
 - Commits: SQL fix `5a396b598349984a7834a6b38455683e9081ab88`; validator guard `e64e61058d25fcc3ff40d351ef69223a732b02bd`.
 - Live impact review: read-only inspection found four live rooms, all Chess rooms in `waiting` status with no board/history fields. No live Draughts room is affected by this stricter check; no rows or production settings were changed.
-- Checks: validation for the source/validator commits is pending GitHub Actions; do not mark this fix PASS until CI completes.
-- State: **PENDING VALIDATION** for this source fix. Staging integration and end-to-end Draughts tests remain blocked.
+- Checks: [GitHub Actions run 40753916627](https://github.com/Opeaa1234/nexora-play/actions/runs/40753916627) passed for the SQL/validator source commit; [run 40753934995](https://github.com/Opeaa1234/nexora-play/actions/runs/40753934995) passed for the subsequent ledger commit. Deno type-check, Chess validation tests, and the project/security guardrails passed.
+- State: **PASS** for static validation and the missing-history guardrail. The Draughts SQL has not been applied to staging or production and still requires integration testing.
 - Next action: verify GitHub Actions for the source/validator commit, then record the result and continue reviewing server-side game-state integrity.
