@@ -1,5 +1,7 @@
 # Nexora Play live Supabase rollout runbook
 
+Continuity and per-session release gates are tracked in [the redevelopment workflow and release ledger](redevelopment-workflow.md). Update that ledger whenever release state or blockers change.
+
 This is a **production change plan**, not permission to run it automatically. The live project contains player profiles, scores, and game rooms. Preserve those records; do not create a replacement project or blindly replay every SQL file.
 
 ## What the read-only review found
