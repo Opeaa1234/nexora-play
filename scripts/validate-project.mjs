@@ -150,6 +150,8 @@ if (!/v_user_id\s+uuid\s*:=\s*auth\.uid\(\)/i.test(joinSql)) fail("Room-join RPC
 if (!joinSql.includes("for update")) fail("Room-join RPC must lock the room row to prevent simultaneous joins");
 if (!joinSql.includes("v_room.status is distinct from 'waiting'")) fail("Room-join RPC must reject null or non-waiting room status");
 if (!joinSql.includes("grant execute on function public.join_game_room(text) to authenticated")) fail("Room-join RPC must be executable by signed-in players");
+if (!draughtsSql.includes("Saved Draughts board is missing.")) fail("Draughts RPC must reject a missing saved board instead of initializing a fresh board in a playing room");
+if (draughtsSql.includes("Only a new room may initialize a board.")) fail("Draughts move RPC must not initialize board state during a move submission");
 if (!draughtsSql.includes("v_user <> v_room.host_id and v_user <> v_room.guest_id")) fail("Draughts move RPC must reject non-player accounts");
 if (!draughtsSql.includes("security definer\nset search_path = ''")) fail("Draughts move RPC must be SECURITY DEFINER with an empty search_path");
 if (!draughtsSql.includes("revoke all on function public.submit_draughts_move(text,integer,integer) from public, anon")) fail("Draughts move RPC must revoke execution from public and anonymous users");
