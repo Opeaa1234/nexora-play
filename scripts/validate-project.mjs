@@ -115,6 +115,7 @@ if (!draughtsHtml.includes("This room is active but its saved Draughts board is 
 if (!draughtsHtml.includes("Saved Draughts board is malformed.")) fail("Live Draughts must reject malformed saved board data before rendering");
 if (!draughtsHtml.includes("Saved Draughts turn is malformed.")) fail("Live Draughts must reject malformed saved turn data");
 if (!draughtsHtml.includes("Saved Draughts continuation square is malformed.")) fail("Live Draughts must reject malformed multi-jump continuation state");
+if (!draughtsHtml.includes("if(!Array.isArray(saved.moves))throw Error('Saved Draughts move history is missing or malformed. The board was not reset.')")) fail("Live Draughts must reject missing saved move history instead of defaulting it to an empty list");
 if (!draughtsHtml.includes("syncVersion=0") || !draughtsHtml.includes("if(request!==syncVersion)return")) fail("Live Draughts refreshes must ignore stale overlapping room reads");
 if (!chessHtml.includes("syncVersion=0") || !chessHtml.includes("if(request!==syncVersion)return")) fail("Live Chess refreshes must ignore stale overlapping room reads");
 
