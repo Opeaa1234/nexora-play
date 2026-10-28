@@ -23,8 +23,8 @@ For every work cycle:
 - **PASS** — Work branch: `redevelopment/phase-2-homepage`.
 - **PASS** — Open draft PR: [#2](https://github.com/Opeaa1234/nexora-play/pull/2).
 - **PASS** — Documentation-only product/design audit PR [#1](https://github.com/Opeaa1234/nexora-play/pull/1) merged as `3b0cda4735b102cd1394bf7a0843d734a63de6cf` after reviewing the complete patch; it contains no runtime code. PR #2 remains draft because multiplayer integration is not yet verified.
-- **PASS** — Latest reviewed branch commit before this ledger entry: `ed726e7c73dbfb6484a6e4bda2a1e2870cb2d996` (records the renderer safeguard and confirms its CI run).
-- **PASS** — Latest confirmed validation before this ledger entry: [GitHub Actions 40760210197](https://github.com/Opeaa1234/nexora-play/actions/runs/40760210197), passed on commit `ed726e7c73dbfb6484a6e4bda2a1e2870cb2d996`. Deno type-check, Chess move-validation tests, and project/security guardrails passed. This ledger update will trigger another validation run.
+- **PASS** — Latest reviewed source/validator commit before this ledger entry: `3a9efb1fa682e58e1bedf6073801b7192e69083b` (account auth callback/profile-loading fix).
+- **PASS** — Latest confirmed validation before this ledger entry: [GitHub Actions 40761252553](https://github.com/Opeaa1234/nexora-play/actions/runs/40761252553), passed on commit `3a9efb1fa682e58e1bedf6073801b7192e69083b`. Deno type-check, Chess move-validation tests, and project/security guardrails passed. This ledger update will trigger another validation run.
 - **NOT TESTED** — Full browser end-to-end tests against a separate staging backend.
 - **NOT TESTED** — Live multiplayer smoke tests after a coordinated database/function/frontend release.
 
@@ -171,3 +171,14 @@ Append a dated entry below after each meaningful work cycle:
 - Checks: [GitHub Actions 40760091479](https://github.com/Opeaa1234/nexora-play/actions/runs/40760091479) passed on the latest source/validator commit, including Deno type-check, Chess move-validation tests, and project/security guardrails.
 - State: **PASS** for static validation; **NOT TESTED** in browser/staging. No production SQL, data, permissions, Auth settings, or deployments were changed.
 - Next action: confirm CI for this ledger update, continue source review, and keep PR #2 in draft until staging integration and two-player E2E checks pass.
+
+
+### 2026-10-28 — avoid duplicate profile loads from auth callbacks
+
+- Finding: the account page called `showSession(session)` for every Supabase auth-state event, including initial-session and token-refresh events, while login/signup/logout handlers also rendered the same session explicitly. Concurrent profile reads could both observe a missing profile and race to insert it, producing a misleading duplicate-profile error.
+- Change: the auth listener now defers session rendering outside the auth callback and only reacts to sign-in/sign-out events (while preserving the dedicated password-recovery event handling). Login/signup/logout flows rely on the event for session rendering rather than repeating the same call. Added validator guards for the intended event handling.
+- Commits: account fix `fd9d2179764c63540d311fbcb8bc82fb10f365b4`; validator guard `3a9efb1fa682e58e1bedf6073801b7192e69083b`.
+- Checks: [GitHub Actions run 40761252553](https://github.com/Opeaa1234/nexora-play/actions/runs/40761252553) passed on `3a9efb1fa682e58e1bedf6073801b7192e69083b`, including Deno type-check, Chess move-validation tests, and project/security guardrails.
+- State: **PASS** for static validation. Real auth callback behavior is still **NOT TESTED** against staging; no live database or production deployment was changed.
+- Risks/blockers: separate staging Supabase project and staging-only GitHub secrets are still missing; PR #2 remains draft until backend integration and two-player E2E tests pass.
+- Next action: continue targeted review of auth/profile state transitions, then resolve staging prerequisites before environment-backed testing.
