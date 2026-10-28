@@ -21,8 +21,8 @@ For every work cycle:
 
 - **PASS** — Work branch: `redevelopment/phase-2-homepage`.
 - **PASS** — Open draft PR: [#2](https://github.com/Opeaa1234/nexora-play/pull/2).
-- **PASS** — Latest source commit before this session: `f394e617dd645cd996ac3131fb2bea1b077cc35f`; this session's latest commit is recorded below.
-- **PASS** — Latest confirmed validation run before this session: [GitHub Actions 40751512195](https://github.com/Opeaa1234/nexora-play/actions/runs/40751512195). The new history-integrity fix requires a fresh run before its state can be marked PASS.
+- **PASS** — Latest branch head: `2517a9a4333a613f66fcc3cce8a2f3d971f14523` (updated workflow ledger after the Chess saved-history integrity fix).
+- **PASS** — Latest validation run: [GitHub Actions 40752137527](https://github.com/Opeaa1234/nexora-play/actions/runs/40752137527), successful on latest branch head `2517a9a4333a613f66fcc3cce8a2f3d971f14523`.
 - **NOT TESTED** — Full browser end-to-end tests against a separate staging backend.
 - **NOT TESTED** — Live multiplayer smoke tests after a coordinated database/function/frontend release.
 
@@ -100,7 +100,7 @@ Append a dated entry below after each meaningful work cycle:
 
 - Change: source review found that the Chess Edge Function and atomic SQL RPC both treated missing saved move history as an empty move list. On an active room with malformed state, that could allow a move to be validated from the starting position and overwrite the saved state. The Edge Function now returns HTTP 409 when saved history is not an array; the SQL RPC independently rejects a missing/non-array history before compare-and-swap.
 - Commits: Edge Function `49e682afc2152a6d960cb065ecc8a01092926ef7`; SQL `e644d3e3271834c6caa4564c7abe3e2758d6f1ef`; validator regression guard `318f274f77e7d3a74955834c115eb064153fcb1d`.
-- Checks: prior branch CI [40751512195](https://github.com/Opeaa1234/nexora-play/actions/runs/40751512195) passed before this fix. CI for `318f274f77e7d3a74955834c115eb064153fcb1d` has not yet been confirmed at the time of this ledger update.
-- State: **NOT YET VERIFIED** for the new source revision pending GitHub Actions. Production database, deployment, and permissions were not changed; the SQL file is a reviewed source change only and still needs staging application/testing.
+- Checks: [GitHub Actions 40752071298](https://github.com/Opeaa1234/nexora-play/actions/runs/40752071298) passed for source commit `318f274f77e7d3a74955834c115eb064153fcb1d`; [GitHub Actions 40752137527](https://github.com/Opeaa1234/nexora-play/actions/runs/40752137527) passed for the latest branch head after the ledger update. Deno type-check, Chess validation tests, and project/security guardrails all passed.
+- State: **PASS** for the latest branch head's static validation. Production database, deployment, and permissions were not changed; the SQL file is a reviewed source change only and still needs staging application/testing.
 - Risks/blockers: staging project and staging-only GitHub secrets remain unavailable/unconfirmed; no production rollout is authorized.
 - Next action: confirm CI for the latest commit, then continue targeted validation and resolve staging prerequisites before any deployment.
