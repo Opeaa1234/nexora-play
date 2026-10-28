@@ -66,12 +66,11 @@ if (!accountHtml.includes("if(u.protocol!=='https:')")) fail("Profile avatar URL
 if (!accountHtml.includes("loginTab.setAttribute('aria-pressed',String(mode==='login'))")) fail("Account mode buttons must expose their selected state accessibly");
 
 const draughtsSql = await readFile(path.join(root, "supabase/live-draughts-moves.sql"), "utf8").catch(() => "");
-if (!draughtsSql.includes("if not (v_room.game_state ? 'board') then")) fail("Draughts may initialize a board only when saved state has no board key");
+if (!draughtsSql.includes("if v_room.game_state is null or not (v_room.game_state ? 'board') then")) fail("Draughts move RPC must reject missing saved board rather than reinitialize it during a move");
 if (!/if jsonb_array_length\(v_board\) <> 64 then[\s\S]*?end if;\s*for idx in 0\.\.63 loop/i.test(draughtsSql)) fail("Draughts SQL must terminate the board-length guard before iterating squares");
 if (!draughtsSql.includes("v_room.game_type is distinct from 'draughts'")) fail("Draughts RPC must reject null or incorrect room types");
 if (!draughtsSql.includes("v_room.status is distinct from 'playing'")) fail("Draughts RPC must reject null or non-playing room status");
 if (!/if jsonb_typeof\(v_board\) is distinct from 'array' then[\s\S]*?if jsonb_array_length\(v_board\) <> 64 then/i.test(draughtsSql)) fail("Draughts RPC must type-check saved boards before measuring their length");
-if (!draughtsSql.includes("Saved Draughts state has move history but no board.")) fail("Draughts RPC must reject move history that has lost its board");
 if (!draughtsSql.includes("if v_piece not in ('r','b','R','B')")) fail("Draughts move RPC must reject unknown saved board pieces");
 if (!draughtsSql.includes("v_turn is distinct from 'r' and v_turn is distinct from 'b'")) fail("Draughts move RPC must reject missing, null, or invalid saved turns");
 if (!draughtsSql.includes("Saved multi-jump state has no available continuation.")) fail("Draughts RPC must reject stale forced multi-jump state instead of allowing a normal move");
