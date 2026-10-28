@@ -112,6 +112,7 @@ if (!draughtsHtml.includes("const square=String.fromCharCode(97+i%8)+(8-Math.flo
 if (!draughtsHtml.includes("p===p.toUpperCase()?'king':'man'")) fail("Live Draughts square labels must announce piece type");
 if (!draughtsHtml.includes('role="status" aria-live="polite"')) fail("Live Draughts must announce changing turn and match status to screen readers");
 if (!draughtsHtml.includes("This room is active but its saved Draughts board is missing.")) fail("Live Draughts must not silently reset an active room with missing saved board state");
+if (!draughtsHtml.includes("else{throw Error('Saved Draughts board is missing. The board was not reset.');}")) fail("Live Draughts must reject missing board state in waiting rooms too, rather than displaying a reconstructed board");
 if (!draughtsHtml.includes("Saved Draughts board is malformed.")) fail("Live Draughts must reject malformed saved board data before rendering");
 if (!draughtsHtml.includes("Saved Draughts turn is malformed.")) fail("Live Draughts must reject malformed saved turn data");
 if (!draughtsHtml.includes("Saved Draughts continuation square is malformed.")) fail("Live Draughts must reject malformed multi-jump continuation state");
