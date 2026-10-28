@@ -55,7 +55,11 @@ begin
     raise exception 'This chess room is not currently playing.';
   end if;
 
-  v_current_moves := coalesce(v_room.game_state->'moves', '[]'::jsonb);
+  v_current_moves := v_room.game_state->'moves';
+  if v_current_moves is null
+     or jsonb_typeof(v_current_moves) is distinct from 'array' then
+    raise exception 'Saved chess move history is missing or malformed.';
+  end if;
   if v_current_moves is distinct from p_expected_moves then
     raise exception 'The chess position changed. Refresh and try again.';
   end if;
