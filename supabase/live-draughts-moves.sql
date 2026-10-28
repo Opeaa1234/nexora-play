@@ -64,22 +64,10 @@ begin
   if v_user <> v_room.host_id and v_user <> v_room.guest_id then raise exception 'You are not a player in this room.'; end if;
 
   v_board := v_room.game_state->'board';
-  if not (v_room.game_state ? 'board') then
-    -- Only a new room may initialize a board. Never silently reset saved state.
-    if coalesce(v_room.game_state->'moves', '[]'::jsonb) <> '[]'::jsonb then
-      raise exception 'Saved Draughts state has move history but no board.';
-    end if;
-    for idx in 0..63 loop
-      if ((idx / 8 + idx % 8) % 2) = 1 then
-        if idx / 8 < 3 then b[idx+1] := 'b';
-        elsif idx / 8 > 4 then b[idx+1] := 'r';
-        end if;
-      end if;
-    end loop;
-    v_turn := 'r';
-    v_forced := null;
-    v_moves := '[]'::jsonb;
-  else
+  if v_room.game_state is null or not (v_room.game_state ? 'board') then
+    -- A move RPC may only mutate an already initialized, playing room.
+    raise exception 'Saved Draughts board is missing.';
+  end if;
     if jsonb_typeof(v_board) is distinct from 'array' then
       raise exception 'Saved Draughts board must be a JSON array.';
     end if;
@@ -113,7 +101,6 @@ begin
     if jsonb_typeof(v_moves) is distinct from 'array' then
       raise exception 'Saved Draughts move history is invalid.';
     end if;
-  end if;
 
   if (v_turn = 'r' and v_user <> v_room.host_id) or (v_turn = 'b' and v_user <> v_room.guest_id) then
     raise exception 'It is not your turn.';
