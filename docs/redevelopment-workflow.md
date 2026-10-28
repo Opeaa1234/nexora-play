@@ -22,8 +22,9 @@ For every work cycle:
 
 - **PASS** — Work branch: `redevelopment/phase-2-homepage`.
 - **PASS** — Open draft PR: [#2](https://github.com/Opeaa1234/nexora-play/pull/2).
-- **PASS** — Latest reviewed branch commit before this ledger entry: `3ce9d838b1c40b31d973a3ec564be863d4c9b47b` (reject missing Draughts boards during moves and update static guardrails).
-- **PASS** — Latest confirmed validation before this ledger entry: [GitHub Actions 40754741092](https://github.com/Opeaa1234/nexora-play/actions/runs/40754741092), successful on commit `3ce9d838b1c40b31d973a3ec564be863d4c9b47b`. This ledger update triggers another validation run.
+- **PASS** — Documentation-only product/design audit PR [#1](https://github.com/Opeaa1234/nexora-play/pull/1) merged as `3b0cda4735b102cd1394bf7a0843d734a63de6cf` after reviewing the complete patch; it contains no runtime code. PR #2 remains draft because multiplayer integration is not yet verified.
+- **PASS** — Latest reviewed branch commit before this ledger entry: `740fd2f5f8a8b9a60c42a9142b985492afac87e4` (reject missing Draughts board/history in both server SQL and client rendering).
+- **PASS** — Latest confirmed validation before this ledger entry: [GitHub Actions 40755366484](https://github.com/Opeaa1234/nexora-play/actions/runs/40755366484), successful on commit `740fd2f5f8a8b9a60c42a9142b985492afac87e4`. This ledger update triggers another validation run.
 - **NOT TESTED** — Full browser end-to-end tests against a separate staging backend.
 - **NOT TESTED** — Live multiplayer smoke tests after a coordinated database/function/frontend release.
 
@@ -144,3 +145,12 @@ Append a dated entry below after each meaningful work cycle:
 - State: **PASS** for static validation; **NOT TESTED** against a live staging Draughts game because no separate staging project is available. No production SQL, data, permissions, or deployments were changed.
 - Merge rule: PRs will be merged only after their relevant checks pass and corresponding functionality is verified in the appropriate environment. PR #2 remains blocked on staging integration and two-player E2E testing.
 - Next action: refresh PR status, confirm the ledger commit's CI, review the documentation-only PR #1, and continue targeted source review without modifying production.
+
+
+### 2026-10-28 — fail closed on missing Draughts client state
+- Change: the multiplayer Draughts client previously defaulted missing saved move history to an empty array, and displayed a reconstructed initial board for a waiting room whose saved board was absent. The client now rejects missing history whenever a saved board is present and rejects a missing board instead of rendering a reconstructed board. Static guardrails require both checks.
+- Commits: client history rejection `c89f50a2948452b4d6ece7196fb29254b66c917a`; validator guard `be3a7d946dca06ae0d34a19f5a5f663588a55c39`; missing-board fallback removal `762b4ffeb57a43737139ac6e14fee406a96e1b72`; validator guard `740fd2f5f8a8b9a60c42a9142b985492afac87e4`.
+- Checks: [GitHub Actions 40755213631](https://github.com/Opeaa1234/nexora-play/actions/runs/40755213631) passed on `be3a7d946dca06ae0d34a19f5a5f663588a55c39`; [run 40755366484](https://github.com/Opeaa1234/nexora-play/actions/runs/40755366484) passed on `740fd2f5f8a8b9a60c42a9142b985492afac87e4`. Both covered Deno type-check, Chess move-validation tests, and project/security guardrails.
+- State: **PASS** for static checks; **NOT TESTED** against a separate staging backend. No production SQL, data, permissions, Auth settings, or deployments were changed.
+- Pull request status: PR #1 is merged as a documentation-only change. PR #2 remains draft until staging SQL/function integration, browser E2E, and two-user Chess/Draughts checks pass.
+- Next action: confirm CI for the ledger update, continue source review, and do not merge PR #2 solely because static CI is green.
