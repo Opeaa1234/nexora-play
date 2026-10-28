@@ -23,8 +23,8 @@ For every work cycle:
 - **PASS** — Work branch: `redevelopment/phase-2-homepage`.
 - **PASS** — Open draft PR: [#2](https://github.com/Opeaa1234/nexora-play/pull/2).
 - **PASS** — Documentation-only product/design audit PR [#1](https://github.com/Opeaa1234/nexora-play/pull/1) merged as `3b0cda4735b102cd1394bf7a0843d734a63de6cf` after reviewing the complete patch; it contains no runtime code. PR #2 remains draft because multiplayer integration is not yet verified.
-- **PASS** — Latest reviewed branch commit before this ledger entry: `15e720f98a057cb1a5d2b2c934c3192a48792815` (records confirmed CI for the private waiting-room visibility fix).
-- **PASS** — Latest confirmed validation before this ledger entry: [GitHub Actions 40756775306](https://github.com/Opeaa1234/nexora-play/actions/runs/40756775306), passed on commit `15e720f98a057cb1a5d2b2c934c3192a48792815`. Deno type-check, Chess move-validation tests, and project/security guardrails passed.
+- **PASS** — Latest reviewed branch commit before this ledger entry: `a01f7c7d80ea7827853bda0241ae8fb90db2d06f` (prevents the Draughts renderer from displaying a fabricated initial board when saved state is unavailable).
+- **PASS** — Latest confirmed validation before this ledger entry: [GitHub Actions 40760091479](https://github.com/Opeaa1234/nexora-play/actions/runs/40760091479), passed on commit `a01f7c7d80ea7827853bda0241ae8fb90db2d06f`. Deno type-check, Chess move-validation tests, and project/security guardrails passed. This ledger update will trigger another validation run.
 - **NOT TESTED** — Full browser end-to-end tests against a separate staging backend.
 - **NOT TESTED** — Live multiplayer smoke tests after a coordinated database/function/frontend release.
 
@@ -162,3 +162,12 @@ Append a dated entry below after each meaningful work cycle:
 - Checks: [GitHub Actions 40756495841](https://github.com/Opeaa1234/nexora-play/actions/runs/40756495841) passed for the lobby query commit; [run 40756625740](https://github.com/Opeaa1234/nexora-play/actions/runs/40756625740) passed on the later branch head including the validator guard and this ledger entry.
 - State: **PASS** for the query change's static validation; **NOT TESTED** in a live browser session because no staging backend is available. No production SQL, permissions, data, or deployments changed.
 - Next action: confirm CI for the latest branch head, continue multiplayer source review, and keep PR #2 in draft until staging and two-player E2E checks pass.
+
+
+### 2026-10-28 — fail closed in Draughts renderer when state is unavailable
+- Finding: despite earlier loader checks, `paint()` still used `state || initialBoard()`. If saved state was missing/malformed and loading failed, the page could continue displaying a fresh initial board, contradicting the state-integrity safeguards.
+- Fix: renderer now shows an explicit “Waiting for verified saved board state…” placeholder when state is unavailable; it no longer calls `initialBoard()` as a display fallback. Sync clears the current state and clears the board before validating newly fetched state, preventing stale or fabricated positions from being shown after a bad payload. Added static regression guards for both behaviors.
+- Commits: renderer fix `2db6d9462d8e63194fa90a9afaab3def2ce43b02`; validator guard `a01f7c7d80ea7827853bda0241ae8fb90db2d06f`.
+- Checks: [GitHub Actions 40760091479](https://github.com/Opeaa1234/nexora-play/actions/runs/40760091479) passed on the latest source/validator commit, including Deno type-check, Chess move-validation tests, and project/security guardrails.
+- State: **PASS** for static validation; **NOT TESTED** in browser/staging. No production SQL, data, permissions, Auth settings, or deployments were changed.
+- Next action: confirm CI for this ledger update, continue source review, and keep PR #2 in draft until staging integration and two-player E2E checks pass.
