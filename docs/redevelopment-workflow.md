@@ -73,8 +73,16 @@ Append a dated entry below after each meaningful work cycle:
 
 ### 2026-10-28 — continuity and release-gate record
 - Change: created this tracked workflow/ledger so work sessions share a durable checklist and truthful release state.
-- Commit: recorded by the GitHub commit history for this file.
-- Checks: the existing CI result above applies to the preceding code revision; this documentation-only change must still pass the next Actions run.
-- State: repository validation previously passed; this new documentation commit's CI is **NOT YET VERIFIED** until its run completes.
-- Risks/blockers: staging infrastructure and the coordinated Supabase rollout remain blocked; no production changes authorized or performed.
-- Next action: verify CI on the new commit, then continue targeted source review and resolve staging prerequisites before any environment deployment.
+- Commit: `51bd1eac7afcb5b8eb353fab09f523f4b5101098`; rollout runbook linked in `878ed25bcca9104571eb54caa3ba43576d9146c6`.
+- Checks: existing CI passed on `7b768f5999355aa39147e3eed22cdc88c1176c60`; CI for the subsequent documentation commits was not verified in the previous session.
+- State: **NOT YET VERIFIED** on the latest source revision until the Actions run confirms it.
+- Risks/blockers: staging infrastructure and coordinated Supabase rollout remain blocked; no production changes authorized or performed.
+- Next action: continue targeted source review, expand Chess move-rule coverage, and resolve staging prerequisites before any environment deployment.
+
+### 2026-10-28 — expand Chess validator regression coverage
+- Change: added regression tests for legal kingside castling and en-passant capture to ensure full-history replay accepts these special legal moves.
+- Commit: `9952e658ac2d28e574355bc333bf9f51b90f728f`.
+- Checks: tests committed but **NOT YET VERIFIED** by Deno/GitHub Actions at ledger update time.
+- State: test coverage expanded; runtime/CI result pending.
+- Risks/blockers: staging infrastructure and live integration tests remain blocked; no production changes authorized or performed.
+- Next action: confirm CI for the new test commit; if green, continue reviewing rule edge cases and staging prerequisites.
