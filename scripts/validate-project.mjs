@@ -83,6 +83,7 @@ if (!draughtsSql.trimEnd().endsWith("grant execute on function public.submit_dra
 
 const chessHtml = pages.get("multiplayer-chess.html")?.source ?? "";
 const chessSql = await readFile(path.join(root, "supabase/live-chess-moves.sql"), "utf8").catch(() => "");
+const chessFunction = await readFile(path.join(root, "supabase/functions/submit-chess-move/index.ts"), "utf8").catch(() => "");
 const edge = await readFile(path.join(root, "supabase/functions/submit-chess-move/index.ts"), "utf8").catch(() => "");
 const validation = await readFile(path.join(root, "supabase/functions/submit-chess-move/validation.ts"), "utf8").catch(() => "");
 if (!chessHtml.includes("functions.invoke('submit-chess-move'")) fail("multiplayer-chess.html must submit moves through the submit-chess-move Edge Function");
@@ -158,6 +159,9 @@ if (!draughtsSql.includes("It is not your turn.")) fail("Draughts move RPC must 
 if (!draughtsSql.includes("Saved Draughts continuation square does not contain the current player piece.")) fail("Draughts RPC must reject stale or opponent-owned multi-jump continuation squares");
 if (!draughtsSql.includes("v_turn := v_room.game_state->>'turn';") || !draughtsSql.includes("v_turn is distinct from 'r' and v_turn is distinct from 'b'")) fail("Draughts RPC must reject missing or null saved turn state instead of defaulting to Red");
 if (!chessSql.includes("v_current_moves is distinct from p_expected_moves")) fail("Chess move RPC must compare-and-swap against the current move history");
+if (!/v_current_moves := v_room\.game_state->'moves';[\s\S]*?jsonb_typeof\(v_current_moves\) is distinct from 'array'[\s\S]*?Saved chess move history is missing or malformed\./i.test(chessSql)) fail("Chess move RPC must reject missing or malformed saved history instead of resetting the position");
+if (!chessFunction.includes("const savedMoves = room.game_state?.moves;")) fail("Chess Edge Function must read saved move history explicitly");
+if (!/if \(!Array\.isArray\(savedMoves\)\)[\s\S]*?Saved chess move history is missing or malformed/i.test(chessFunction)) fail("Chess Edge Function must reject missing or malformed saved history instead of resetting the position");
 if (!chessSql.includes("v_room.game_type is distinct from 'chess'")) fail("Chess RPC must reject null or incorrect room types");
 if (!chessSql.includes("v_room.status is distinct from 'playing'")) fail("Chess RPC must reject null or non-playing room status");
 
