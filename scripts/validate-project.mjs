@@ -62,7 +62,7 @@ if (!draughtsSql.includes("v_room.status is distinct from 'playing'")) fail("Dra
 if (!/if jsonb_typeof\(v_board\) is distinct from 'array' then[\s\S]*?if jsonb_array_length\(v_board\) <> 64 then/i.test(draughtsSql)) fail("Draughts RPC must type-check saved boards before measuring their length");
 if (!draughtsSql.includes("Saved Draughts state has move history but no board.")) fail("Draughts RPC must reject move history that has lost its board");
 if (!draughtsSql.includes("if v_piece not in ('r','b','R','B')")) fail("Draughts move RPC must reject unknown saved board pieces");
-if (!draughtsSql.includes("if v_turn not in ('r','b')")) fail("Draughts move RPC must reject an invalid saved turn");
+if (!draughtsSql.includes("v_turn is distinct from 'r' and v_turn is distinct from 'b'")) fail("Draughts move RPC must reject missing, null, or invalid saved turns");
 if (!draughtsSql.includes("Saved multi-jump state has no available continuation.")) fail("Draughts RPC must reject stale forced multi-jump state instead of allowing a normal move");
 if (!draughtsSql.includes("jsonb_typeof(v_moves) is distinct from 'array'")) fail("Draughts move RPC must reject malformed saved move history");
 if (!draughtsSql.includes("if p_room_code is null or p_room_code !~ '^[A-Za-z0-9]{6}$' then")) fail("Draughts move RPC must validate room-code input");
