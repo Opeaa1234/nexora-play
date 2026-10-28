@@ -55,3 +55,14 @@ Expected: `authenticated_can_update_rooms = false`, `anonymous_can_join = false`
 ## Separate staging deployment
 
 The GitHub Actions workflow `.github/workflows/deploy-staging-chess.yml` is intentionally restricted to the `staging` environment and a staging project ref. It deploys the Chess Edge Function only and does **not** apply SQL. Never repurpose its staging secret as a production credential. Production deployment requires a separately reviewed, explicit action and production-specific safeguards.
+
+## Additional read-only blockers recorded on 2026-10-28
+
+- The connected Supabase account listed only the existing live project; no separate staging project or Supabase development branches were available at review time. No Edge Functions were deployed. Do not run the staging workflow until a genuinely separate staging project is provisioned and its credentials are stored in the GitHub `staging` environment. Creating a project/branch may incur cost and needs a deliberate choice.
+- Supabase security advisors reported that `public.rls_auto_enable()` is executable by both `anon` and `authenticated` while marked `SECURITY DEFINER`. Inspect its definition and any event trigger that depends on it, then prepare and test a least-privilege fix in staging. Do not blindly revoke privileges or alter the trigger in production.
+- The legacy `public.submit_chess_move(text,text)` is executable by `authenticated` and does not perform full legal chess move validation. This is a release-blocking concern for multiplayer integrity; retire it only as part of the coordinated rollout above, not as an isolated production change.
+- Supabase Auth's leaked-password protection was reported disabled. Review the Auth password-security setting and enable it through a separately reviewed change, accounting for the user experience.
+- Performance advisors also noted RLS policies on `player_profiles` and `player_best_scores` that re-evaluate auth functions per row, plus an unused `game_rooms_host_idx`. These are optimization findings, not a reason to make untested production changes; validate any policy/index changes against actual query patterns in staging first.
+
+These are advisor findings from a read-only check, not proof of exploitation. Re-run the advisors immediately before release and record which findings were resolved, accepted, or remain open.
+
