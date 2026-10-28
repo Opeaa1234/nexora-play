@@ -106,7 +106,10 @@ begin
     if v_forced is not null and (b[v_forced+1] is null or lower(b[v_forced+1]) <> v_turn) then
       raise exception 'Saved Draughts continuation square does not contain the current player piece.';
     end if;
-    v_moves := coalesce(v_room.game_state->'moves','[]'::jsonb);
+    if not (v_room.game_state ? 'moves') then
+      raise exception 'Saved Draughts move history is missing.';
+    end if;
+    v_moves := v_room.game_state->'moves';
     if jsonb_typeof(v_moves) is distinct from 'array' then
       raise exception 'Saved Draughts move history is invalid.';
     end if;
