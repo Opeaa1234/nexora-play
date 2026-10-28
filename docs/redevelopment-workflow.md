@@ -82,7 +82,7 @@ Append a dated entry below after each meaningful work cycle:
 ### 2026-10-28 — expand Chess validator regression coverage
 - Change: added regression tests for legal kingside castling and en-passant capture to ensure full-history replay accepts these special legal moves.
 - Commit: `9952e658ac2d28e574355bc333bf9f51b90f728f`.
-- Checks: tests committed but **NOT YET VERIFIED** by Deno/GitHub Actions at ledger update time.
-- State: test coverage expanded; runtime/CI result pending.
+- Checks: [GitHub Actions run 40751028247](https://github.com/Opeaa1234/nexora-play/actions/runs/40751028247) **PASSED**, including Deno type-check, Chess move validation tests, and project/security guardrail validation.
+- State: **PASS** for the tested source revision `9952e658ac2d28e574355bc333bf9f51b90f728f`. A subsequent documentation-only ledger commit `725cf68ea25f7d580d6e4e2d5f5634007d751548` is newer and still needs its own CI confirmation.
 - Risks/blockers: staging infrastructure and live integration tests remain blocked; no production changes authorized or performed.
-- Next action: confirm CI for the new test commit; if green, continue reviewing rule edge cases and staging prerequisites.
+- Next action: verify CI for the newest branch head, then continue reviewing rule edge cases and staging prerequisites.
