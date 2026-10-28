@@ -95,8 +95,10 @@ begin
         b[idx+1] := v_piece;
       end if;
     end loop;
-    v_turn := coalesce(v_room.game_state->>'turn','r');
-    if v_turn not in ('r','b') then raise exception 'Saved Draughts turn is invalid.'; end if;
+    v_turn := v_room.game_state->>'turn';
+    if v_turn is distinct from 'r' and v_turn is distinct from 'b' then
+      raise exception 'Saved Draughts turn is invalid or missing.';
+    end if;
     v_forced := nullif(v_room.game_state->>'forced_from','')::integer;
     if v_forced is not null and v_forced not between 0 and 63 then
       raise exception 'Saved Draughts continuation square is invalid.';
