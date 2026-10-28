@@ -104,3 +104,12 @@ Append a dated entry below after each meaningful work cycle:
 - State: **PASS** for the latest branch head's static validation. Production database, deployment, and permissions were not changed; the SQL file is a reviewed source change only and still needs staging application/testing.
 - Risks/blockers: staging project and staging-only GitHub secrets remain unavailable/unconfirmed; no production rollout is authorized.
 - Next action: confirm CI for the latest commit, then continue targeted validation and resolve staging prerequisites before any deployment.
+
+
+### 2026-10-28 — broaden malformed Chess history regression tests
+
+- Change: expanded the saved-history regression test to reject `null`, `undefined`, objects, strings, and numeric values when attempting a legal opening move. This protects against accidentally treating malformed state as a fresh board.
+- Commit: `40f8b2359a9ab511ea00608c58d7ee9d6271ed62`.
+- Validation: [GitHub Actions 40752646971](https://github.com/Opeaa1234/nexora-play/actions/runs/40752646971) passed for the test commit.
+- State: **PASS** for static validation and malformed-history regression coverage. Staging integration and production rollout remain blocked/not authorized; no live Supabase changes were made.
+- Next action: continue targeted source review, then resolve separate staging project and staging-only secrets before integration testing.
