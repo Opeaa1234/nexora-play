@@ -21,8 +21,8 @@ For every work cycle:
 
 - **PASS** — Work branch: `redevelopment/phase-2-homepage`.
 - **PASS** — Open draft PR: [#2](https://github.com/Opeaa1234/nexora-play/pull/2).
-- **PASS** — Latest branch head: `2517a9a4333a613f66fcc3cce8a2f3d971f14523` (updated workflow ledger after the Chess saved-history integrity fix).
-- **PASS** — Latest validation run: [GitHub Actions 40752137527](https://github.com/Opeaa1234/nexora-play/actions/runs/40752137527), successful on latest branch head `2517a9a4333a613f66fcc3cce8a2f3d971f14523`.
+- **PASS** — Latest reviewed branch commit before this ledger entry: `7ab3e971bcd15357024ec277984f983b81544923` (`docs: record current live Supabase review and release risks`). The ledger update itself creates a new commit and triggers another validation run.
+- **PASS** — Latest confirmed validation before this ledger entry: [GitHub Actions 40753423383](https://github.com/Opeaa1234/nexora-play/actions/runs/40753423383), successful for the live-review documentation commit `7ab3e971bcd15357024ec277984f983b81544923`.
 - **NOT TESTED** — Full browser end-to-end tests against a separate staging backend.
 - **NOT TESTED** — Live multiplayer smoke tests after a coordinated database/function/frontend release.
 
@@ -113,3 +113,14 @@ Append a dated entry below after each meaningful work cycle:
 - Validation: [GitHub Actions 40752646971](https://github.com/Opeaa1234/nexora-play/actions/runs/40752646971) passed for the test commit.
 - State: **PASS** for static validation and malformed-history regression coverage. Staging integration and production rollout remain blocked/not authorized; no live Supabase changes were made.
 - Next action: continue targeted source review, then resolve separate staging project and staging-only secrets before integration testing.
+
+
+### 2026-10-28 — current live Supabase review and release risk confirmation
+
+- Change: added [live Supabase read-only review](live-supabase-read-only-review-2026-10-28.md) documenting the current project inventory, live routine state, advisor findings, and safe rollout sequencing.
+- Commit: `7ab3e971bcd15357024ec277984f983b81544923`.
+- Checks: [GitHub Actions run 40753423383](https://github.com/Opeaa1234/nexora-play/actions/runs/40753423383) passed, including Deno type-check, Chess validation tests, and project/security guardrails.
+- Live findings: the legacy authenticated `submit_chess_move(text,text)` remains present and does not validate full Chess legality; the replacement service-role-only RPC is absent and no Edge Functions are deployed. The `rls_auto_enable()` advisor warning refers to an event-trigger function attached to `ensure_rls`, so it requires event-trigger-aware privilege review. RLS is enabled on the three observed public tables.
+- State: **PASS** for static CI and read-only inspection; **BLOCKED** for full staging integration. No live SQL, privileges, Auth settings, deployments, or data were changed.
+- Risks/blockers: only the live Supabase project is available, no development branches exist, and no staging-only GitHub secrets are configured. Do not disable the legacy Chess RPC in isolation because that could break the current client before the replacement is deployed.
+- Next action: provision/confirm a separate staging backend, configure staging-only secrets, apply the reviewed SQL and deploy the Edge Function in staging, then run two-player Chess/Draughts and security smoke tests before planning any production rollout.
