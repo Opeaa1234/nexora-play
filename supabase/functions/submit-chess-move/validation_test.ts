@@ -93,3 +93,21 @@ Deno.test("detects a threefold-repetition draw", () => {
   assert.equal(result.status, "finished");
   assert.equal(result.result, "1/2-1/2");
 });
+
+Deno.test("accepts legal kingside castling after replaying the complete history", () => {
+  const history = [
+    "e2e4", "e7e5", "g1f3", "b8c6",
+    "f1e2", "g8f6",
+  ];
+  const result = validateAndApplyChessMove(history, "e1g1", "w");
+  assert.equal(result.nextMoves.at(-1), "e1g1");
+  assert.equal(result.status, "playing");
+});
+
+Deno.test("accepts a legal en-passant capture", () => {
+  const history = ["e2e4", "a7a6", "e4e5", "d7d5"];
+  const result = validateAndApplyChessMove(history, "e5d6", "w");
+  assert.equal(result.nextMoves.at(-1), "e5d6");
+  assert.equal(result.status, "playing");
+});
+
