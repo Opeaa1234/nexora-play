@@ -79,10 +79,15 @@ Deno.serve(async (req: Request) => {
     return reply(403, { error: "You are not a player in this room." });
   }
 
+  const savedMoves = room.game_state?.moves;
+  if (!Array.isArray(savedMoves)) {
+    return reply(409, { error: "The saved chess move history is missing or malformed. No move was saved; refresh and contact the room host." });
+  }
+
   let validated;
   try {
     validated = validateAndApplyChessMove(
-      room.game_state?.moves ?? [],
+      savedMoves,
       move,
       authData.user.id === room.host_id ? "w" : "b",
     );
@@ -93,7 +98,7 @@ Deno.serve(async (req: Request) => {
     return reply(400, { error: "The chess move could not be validated." });
   }
 
-  const expectedMoves = Array.isArray(room.game_state?.moves) ? room.game_state.moves : [];
+  const expectedMoves = savedMoves;
   const nextMoves = validated.nextMoves;
   const ended = validated.status === "finished";
   const result = validated.result;
