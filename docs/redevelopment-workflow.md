@@ -14,6 +14,7 @@ For every work cycle:
 6. Keep the state labels honest: **PASS** means a check actually ran and passed; **NOT TESTED** means it has not been verified; **BLOCKED** means a dependency or approval is missing.
 7. Do not call the product production-ready based only on static validation. Browser behavior, real authentication, realtime delivery, and multiplayer flows require environment-backed tests.
 8. Do not apply SQL, change privileges, deploy functions, alter Auth settings, or modify live data without separate explicit production approval and a reviewed rollout plan.
+9. Merge each eligible pull request after its relevant CI passes and the corresponding behavior has been verified in an appropriate test environment. Static validation alone does not clear staging or live-integration gates; keep functionality-dependent PRs in draft until those gates pass.
 
 ## Current release ledger — 2026-10-28
 
@@ -21,8 +22,8 @@ For every work cycle:
 
 - **PASS** — Work branch: `redevelopment/phase-2-homepage`.
 - **PASS** — Open draft PR: [#2](https://github.com/Opeaa1234/nexora-play/pull/2).
-- **PASS** — Latest reviewed branch commit before this ledger entry: `037b10ffb43d67c6a48eaacc0f4419c76c0ebb67` (ledger update recording the Draughts saved-history integrity fix).
-- **PASS** — Latest confirmed validation before this ledger entry: [GitHub Actions 40754035278](https://github.com/Opeaa1234/nexora-play/actions/runs/40754035278), successful on commit `037b10ffb43d67c6a48eaacc0f4419c76c0ebb67`. This ledger update triggers another validation run.
+- **PASS** — Latest reviewed branch commit before this ledger entry: `3ce9d838b1c40b31d973a3ec564be863d4c9b47b` (reject missing Draughts boards during moves and update static guardrails).
+- **PASS** — Latest confirmed validation before this ledger entry: [GitHub Actions 40754741092](https://github.com/Opeaa1234/nexora-play/actions/runs/40754741092), successful on commit `3ce9d838b1c40b31d973a3ec564be863d4c9b47b`. This ledger update triggers another validation run.
 - **NOT TESTED** — Full browser end-to-end tests against a separate staging backend.
 - **NOT TESTED** — Live multiplayer smoke tests after a coordinated database/function/frontend release.
 
@@ -134,3 +135,12 @@ Append a dated entry below after each meaningful work cycle:
 - Checks: [GitHub Actions run 40753916627](https://github.com/Opeaa1234/nexora-play/actions/runs/40753916627) passed for the SQL/validator source commit; [run 40753934995](https://github.com/Opeaa1234/nexora-play/actions/runs/40753934995) passed for the subsequent ledger commit. Deno type-check, Chess validation tests, and the project/security guardrails passed.
 - State: **PASS** for static validation and the missing-history guardrail. The Draughts SQL has not been applied to staging or production and still requires integration testing.
 - Next action: verify GitHub Actions for the source/validator commit, then record the result and continue reviewing server-side game-state integrity.
+
+
+### 2026-10-28 — reject missing Draughts boards during move submission
+- Change: the Draughts move RPC previously initialized a fresh board if a playing room had lost its saved board and its move history was absent/empty. The RPC now rejects a missing or null game state/board instead of attempting to reset a playing game. The project validator now requires this fail-closed behavior and rejects reintroducing the initialization fallback.
+- Commits: SQL fix `0726d14e0ff70bf610efeb618f277c3735d32c2a`; validator guard updates `93125b0004f2c8ea6311273cfeac8413e20329a9` and `3ce9d838b1c40b31d973a3ec564be863d4c9b47b`.
+- Checks: [GitHub Actions 40754741092](https://github.com/Opeaa1234/nexora-play/actions/runs/40754741092) passed on `3ce9d838b1c40b31d973a3ec564be863d4c9b47b`, including Deno type-check, Chess move-validation tests, and project/security guardrails.
+- State: **PASS** for static validation; **NOT TESTED** against a live staging Draughts game because no separate staging project is available. No production SQL, data, permissions, or deployments were changed.
+- Merge rule: PRs will be merged only after their relevant checks pass and corresponding functionality is verified in the appropriate environment. PR #2 remains blocked on staging integration and two-player E2E testing.
+- Next action: refresh PR status, confirm the ledger commit's CI, review the documentation-only PR #1, and continue targeted source review without modifying production.
