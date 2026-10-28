@@ -56,6 +56,9 @@ for (const [file, page] of pages) {
 
 const accountHtml = pages.get("account.html")?.source ?? "";
 if (!accountHtml.includes("resetPasswordForEmail(email")) fail("Account page must offer a Supabase password-recovery flow");
+if (!accountHtml.includes("event==='PASSWORD_RECOVERY'")) fail("Account page must recognize Supabase password-recovery callbacks");
+if (!accountHtml.includes('supabase.auth.updateUser({password})')) fail("Account page must let players set a new password from the recovery callback");
+if (!accountHtml.includes("mode==='recovery'")) fail("Account form must provide a distinct password-recovery submission mode");
 if (!accountHtml.includes('id="resetPasswordBtn"')) fail("Account page must provide a visible forgot-password control");
 if (!accountHtml.includes("redirectTo:'https://opeaa1234.github.io/nexora-play/account.html'")) fail("Password recovery must return players to the account page");
 if (!accountHtml.includes("if(u.protocol!=='https:')")) fail("Profile avatar URLs must use HTTPS");
