@@ -23,8 +23,8 @@ For every work cycle:
 - **PASS** — Work branch: `redevelopment/phase-2-homepage`.
 - **PASS** — Open draft PR: [#2](https://github.com/Opeaa1234/nexora-play/pull/2).
 - **PASS** — Documentation-only product/design audit PR [#1](https://github.com/Opeaa1234/nexora-play/pull/1) merged as `3b0cda4735b102cd1394bf7a0843d734a63de6cf` after reviewing the complete patch; it contains no runtime code. PR #2 remains draft because multiplayer integration is not yet verified.
-- **PASS** — Latest reviewed branch commit before this ledger entry: `740fd2f5f8a8b9a60c42a9142b985492afac87e4` (reject missing Draughts board/history in both server SQL and client rendering).
-- **PASS** — Latest confirmed validation before this ledger entry: [GitHub Actions 40755366484](https://github.com/Opeaa1234/nexora-play/actions/runs/40755366484), successful on commit `740fd2f5f8a8b9a60c42a9142b985492afac87e4`. This ledger update triggers another validation run.
+- **PASS** — Latest reviewed branch commit before this ledger entry: `41238f77b4b9eec508c07ad5ffe13c3f66ae0168` (records the Draughts client state safeguards and documentation-only PR #1 merge).
+- **PASS** — Latest confirmed validation before this ledger entry: [GitHub Actions 40755496140](https://github.com/Opeaa1234/nexora-play/actions/runs/40755496140), successful on commit `41238f77b4b9eec508c07ad5ffe13c3f66ae0168`. This ledger update triggers another validation run.
 - **NOT TESTED** — Full browser end-to-end tests against a separate staging backend.
 - **NOT TESTED** — Live multiplayer smoke tests after a coordinated database/function/frontend release.
 
