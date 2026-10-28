@@ -50,13 +50,14 @@ h1{font-size:clamp(1.8rem,4vw,2.7rem);line-height:1.1;margin-bottom:10px} .panel
 <h1>Your player account</h1>
 <p>Sign in to Nexora Play or create an account to get started.</p>
 <div id="authArea">
-<div class="tabs" role="tablist" aria-label="Account action"><button type="button" id="loginTab" class="active">Log in</button><button type="button" id="signupTab">Create account</button></div>
+<div class="tabs" role="group" aria-label="Account action"><button type="button" id="loginTab" class="active" aria-pressed="true">Log in</button><button type="button" id="signupTab" aria-pressed="false">Create account</button></div>
 <form id="authForm">
 <div class="field"><label for="email">Email address</label><input id="email" type="email" autocomplete="email" required placeholder="you@example.com"></div>
 <div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" minlength="8" required placeholder="At least 8 characters"></div>
 <div id="usernameField" class="field hidden"><label for="username">Choose a username</label><input id="username" autocomplete="username" maxlength="24" pattern="[A-Za-z0-9_]{3,24}" placeholder="3–24 letters, numbers or underscores"><div class="hint">Use 3–24 letters, numbers or underscores.</div></div>
 <button class="primary" id="submitBtn" type="submit">Log in</button>
 </form>
+<button type="button" id="resetPasswordBtn" class="small" style="display:block;width:100%;background:transparent;border:0;color:#7de5ff;text-decoration:underline">Forgot password?</button>
 <div id="status" class="status" role="status" aria-live="polite"></div>
 </div>
 <div id="signedIn" class="hidden">
@@ -88,8 +89,9 @@ const loginTab=document.getElementById('loginTab'),signupTab=document.getElement
 const usernameField=document.getElementById('usernameField'),submitBtn=document.getElementById('submitBtn');
 let mode='login';
 function message(text){status.textContent=text}
-function setMode(next){mode=next;loginTab.classList.toggle('active',mode==='login');signupTab.classList.toggle('active',mode==='signup');usernameField.classList.toggle('hidden',mode!=='signup');document.getElementById('password').autocomplete=mode==='login'?'current-password':'new-password';submitBtn.textContent=mode==='login'?'Log in':'Create account';message('')}
+function setMode(next){mode=next;loginTab.classList.toggle('active',mode==='login');signupTab.classList.toggle('active',mode==='signup');loginTab.setAttribute('aria-pressed',String(mode==='login'));signupTab.setAttribute('aria-pressed',String(mode==='signup'));usernameField.classList.toggle('hidden',mode!=='signup');document.getElementById('resetPasswordBtn').hidden=mode!=='login';document.getElementById('password').autocomplete=mode==='login'?'current-password':'new-password';submitBtn.textContent=mode==='login'?'Log in':'Create account';message('')}
 loginTab.addEventListener('click',()=>setMode('login'));signupTab.addEventListener('click',()=>setMode('signup'));
+document.getElementById('resetPasswordBtn').addEventListener('click',async()=>{const emailInput=document.getElementById('email');const email=emailInput.value.trim();if(!email){emailInput.focus();message('Enter your email address first, then choose Forgot password.');return}if(!emailInput.checkValidity()){emailInput.reportValidity();return}const resetBtn=document.getElementById('resetPasswordBtn');resetBtn.disabled=true;message('Sending password-reset email…');try{const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:'https://opeaa1234.github.io/nexora-play/account.html'});if(error)throw error;message('If an account exists for that email, a password-reset link will arrive shortly. Check your inbox and spam folder.')}catch(error){message(error.message||'Could not request a password reset right now. Please try again.')}finally{resetBtn.disabled=false}});
 function validUsername(value){return /^[A-Za-z0-9_]{3,24}$/.test(value)}
 async function showSession(session){
  if(!session){authArea.classList.remove('hidden');signedIn.classList.add('hidden');return}
@@ -143,9 +145,9 @@ form.addEventListener('submit',async event=>{
  finally{submitBtn.disabled=false}
 });
 
-document.getElementById('avatarUrl').addEventListener('input',()=>{const url=document.getElementById('avatarUrl').value.trim();if(url)document.getElementById('avatarPreview').src=url});
+document.getElementById('avatarUrl').addEventListener('input',()=>{const url=document.getElementById('avatarUrl').value.trim();document.getElementById('avatarPreview').src=url||'https://placehold.co/120x120/102b59/ffffff?text=NP'});
 document.getElementById('avatarPreview').addEventListener('error',()=>{document.getElementById('avatarPreview').src='https://placehold.co/120x120/102b59/ffffff?text=NP'});
-document.getElementById('saveProfileBtn').addEventListener('click',async()=>{const btn=document.getElementById('saveProfileBtn');btn.disabled=true;const {data:{session}}=await supabase.auth.getSession();if(!session){document.getElementById('profileStatus').textContent='Please log in again to save profile details.';btn.disabled=false;return}const display_name=document.getElementById('displayNameInput').value.trim();const avatar_url=document.getElementById('avatarUrl').value.trim()||null;if(!display_name){document.getElementById('profileStatus').textContent='Please enter a display name.';btn.disabled=false;return}if(avatar_url){try{const u=new URL(avatar_url);if(!['https:','http:'].includes(u.protocol))throw Error()}catch{document.getElementById('profileStatus').textContent='Please enter a valid image URL starting with https://';btn.disabled=false;return}}const {error}=await supabase.from('player_profiles').update({display_name,avatar_url}).eq('id',session.user.id);document.getElementById('profileStatus').textContent=error?'Could not save profile: '+error.message:'Profile details saved!';if(!error)document.getElementById('playerName').textContent=display_name;btn.disabled=false});
+document.getElementById('saveProfileBtn').addEventListener('click',async()=>{const btn=document.getElementById('saveProfileBtn');btn.disabled=true;const {data:{session}}=await supabase.auth.getSession();if(!session){document.getElementById('profileStatus').textContent='Please log in again to save profile details.';btn.disabled=false;return}const display_name=document.getElementById('displayNameInput').value.trim();const avatar_url=document.getElementById('avatarUrl').value.trim()||null;if(!display_name){document.getElementById('profileStatus').textContent='Please enter a display name.';btn.disabled=false;return}if(avatar_url){try{const u=new URL(avatar_url);if(u.protocol!=='https:')throw Error()}catch{document.getElementById('profileStatus').textContent='Please enter a valid image URL starting with https://';btn.disabled=false;return}}const {error}=await supabase.from('player_profiles').update({display_name,avatar_url}).eq('id',session.user.id);document.getElementById('profileStatus').textContent=error?'Could not save profile: '+error.message:'Profile details saved!';if(!error)document.getElementById('playerName').textContent=display_name;btn.disabled=false});
 document.getElementById('logoutBtn').addEventListener('click',async()=>{
  const {error}=await supabase.auth.signOut();
  document.getElementById('profileStatus').textContent=error?error.message:'You have logged out.';
