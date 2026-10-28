@@ -23,8 +23,8 @@ For every work cycle:
 - **PASS** — Work branch: `redevelopment/phase-2-homepage`.
 - **PASS** — Open draft PR: [#2](https://github.com/Opeaa1234/nexora-play/pull/2).
 - **PASS** — Documentation-only product/design audit PR [#1](https://github.com/Opeaa1234/nexora-play/pull/1) merged as `3b0cda4735b102cd1394bf7a0843d734a63de6cf` after reviewing the complete patch; it contains no runtime code. PR #2 remains draft because multiplayer integration is not yet verified.
-- **PASS** — Latest reviewed branch commit before this ledger entry: `06b4661f91a9b6f84d7df47f5509fe7a46ef8548` (restores host access to private waiting rooms in the lobby and adds a validator regression guard).
-- **PASS** — Latest confirmed validation before this ledger entry: [GitHub Actions 40756495841](https://github.com/Opeaa1234/nexora-play/actions/runs/40756495841), passed on the lobby fix commit `44138251f7f3052da3adf180e373e5cd39874e8`. The additional validator-guard commit `06b4661f91a9b6f84d7df47f5509fe7a46ef8548` is newer and will be covered by the CI run triggered by this ledger update.
+- **PASS** — Latest reviewed branch commit before this ledger entry: `258b05123e5bf8f0f4e397ff06dcbb0506a9ddc5` (records the private waiting-room visibility fix and regression guard).
+- **PASS** — Latest confirmed validation before this ledger entry: [GitHub Actions 40756625740](https://github.com/Opeaa1234/nexora-play/actions/runs/40756625740), passed on commit `258b05123e5bf8f0f4e397ff06dcbb0506a9ddc5`. Deno type-check, Chess move-validation tests, and project/security guardrails passed.
 - **NOT TESTED** — Full browser end-to-end tests against a separate staging backend.
 - **NOT TESTED** — Live multiplayer smoke tests after a coordinated database/function/frontend release.
 
@@ -159,6 +159,6 @@ Append a dated entry below after each meaningful work cycle:
 ### 2026-10-28 — show hosts their private waiting rooms
 - Change: the lobby's open-room query previously required `is_public = true`, hiding a host's own private waiting room even though the UI supports reopening rooms owned by the current host. The query now includes public waiting rooms plus rooms owned by the signed-in host, while still filtering to waiting rooms with no guest. Added a static validator guard to prevent regressions.
 - Commits: lobby query `44138251f7f3052da3adf180e373e5cd39874e8e`; validator guard `06b4661f91a9b6f84d7df47f5509fe7a46ef8548`.
-- Checks: [GitHub Actions 40756495841](https://github.com/Opeaa1234/nexora-play/actions/runs/40756495841) passed for the lobby query commit. CI for the subsequent validator guard and this ledger update is pending.
+- Checks: [GitHub Actions 40756495841](https://github.com/Opeaa1234/nexora-play/actions/runs/40756495841) passed for the lobby query commit; [run 40756625740](https://github.com/Opeaa1234/nexora-play/actions/runs/40756625740) passed on the later branch head including the validator guard and this ledger entry.
 - State: **PASS** for the query change's static validation; **NOT TESTED** in a live browser session because no staging backend is available. No production SQL, permissions, data, or deployments changed.
 - Next action: confirm CI for the latest branch head, continue multiplayer source review, and keep PR #2 in draft until staging and two-player E2E checks pass.
