@@ -55,11 +55,14 @@ Deno.test("rejects illegal moves in stored history", () => {
   );
 });
 
-Deno.test("rejects non-array saved history", () => {
-  assert.throws(
-    () => validateAndApplyChessMove(null, "e2e4", "w"),
-    (error: unknown) => error instanceof ChessMoveValidationError && error.status === 409,
-  );
+Deno.test("rejects missing or malformed saved history without accepting a fresh-board move", () => {
+  for (const history of [null, undefined, {}, "e2e4", 7]) {
+    assert.throws(
+      () => validateAndApplyChessMove(history, "e2e4", "w"),
+      (error: unknown) => error instanceof ChessMoveValidationError && error.status === 409,
+      `Expected history ${String(history)} to be rejected`,
+    );
+  }
 });
 
 Deno.test("rejects malformed UCI input", () => {
