@@ -124,3 +124,13 @@ Append a dated entry below after each meaningful work cycle:
 - State: **PASS** for static CI and read-only inspection; **BLOCKED** for full staging integration. No live SQL, privileges, Auth settings, deployments, or data were changed.
 - Risks/blockers: only the live Supabase project is available, no development branches exist, and no staging-only GitHub secrets are configured. Do not disable the legacy Chess RPC in isolation because that could break the current client before the replacement is deployed.
 - Next action: provision/confirm a separate staging backend, configure staging-only secrets, apply the reviewed SQL and deploy the Edge Function in staging, then run two-player Chess/Draughts and security smoke tests before planning any production rollout.
+
+
+### 2026-10-28 — reject missing saved Draughts move history
+
+- Change: source review found that the Draughts SQL RPC converted a missing `game_state.moves` field into an empty array when the board was present. The RPC now rejects missing saved history, and the project validator guards against reintroducing that fallback.
+- Commits: SQL fix `5a396b598349984a7834a6b38455683e9081ab88`; validator guard `e64e61058d25fcc3ff40d351ef69223a732b02bd`.
+- Live impact review: read-only inspection found four live rooms, all Chess rooms in `waiting` status with no board/history fields. No live Draughts room is affected by this stricter check; no rows or production settings were changed.
+- Checks: validation for the source/validator commits is pending GitHub Actions; do not mark this fix PASS until CI completes.
+- State: **PENDING VALIDATION** for this source fix. Staging integration and end-to-end Draughts tests remain blocked.
+- Next action: verify GitHub Actions for the source/validator commit, then record the result and continue reviewing server-side game-state integrity.
