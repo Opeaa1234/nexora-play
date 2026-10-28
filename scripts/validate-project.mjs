@@ -54,6 +54,13 @@ for (const [file, page] of pages) {
   }
 }
 
+const accountHtml = pages.get("account.html")?.source ?? "";
+if (!accountHtml.includes("resetPasswordForEmail(email")) fail("Account page must offer a Supabase password-recovery flow");
+if (!accountHtml.includes('id="resetPasswordBtn"')) fail("Account page must provide a visible forgot-password control");
+if (!accountHtml.includes("redirectTo:'https://opeaa1234.github.io/nexora-play/account.html'")) fail("Password recovery must return players to the account page");
+if (!accountHtml.includes("if(u.protocol!=='https:')")) fail("Profile avatar URLs must use HTTPS");
+if (!accountHtml.includes("loginTab.setAttribute('aria-pressed',String(mode==='login'))")) fail("Account mode buttons must expose their selected state accessibly");
+
 const draughtsSql = await readFile(path.join(root, "supabase/live-draughts-moves.sql"), "utf8").catch(() => "");
 if (!draughtsSql.includes("if not (v_room.game_state ? 'board') then")) fail("Draughts may initialize a board only when saved state has no board key");
 if (!/if jsonb_array_length\(v_board\) <> 64 then[\s\S]*?end if;\s*for idx in 0\.\.63 loop/i.test(draughtsSql)) fail("Draughts SQL must terminate the board-length guard before iterating squares");
