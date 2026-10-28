@@ -89,7 +89,7 @@ const loginTab=document.getElementById('loginTab'),signupTab=document.getElement
 const usernameField=document.getElementById('usernameField'),submitBtn=document.getElementById('submitBtn');
 let mode='login';
 function message(text){status.textContent=text}
-function setMode(next){mode=next;loginTab.classList.toggle('active',mode==='login');signupTab.classList.toggle('active',mode==='signup');loginTab.setAttribute('aria-pressed',String(mode==='login'));signupTab.setAttribute('aria-pressed',String(mode==='signup'));usernameField.classList.toggle('hidden',mode!=='signup');document.getElementById('resetPasswordBtn').hidden=mode!=='login';document.getElementById('password').autocomplete=mode==='login'?'current-password':'new-password';submitBtn.textContent=mode==='login'?'Log in':'Create account';message('')}
+function setMode(next){mode=next;loginTab.classList.toggle('active',mode==='login');signupTab.classList.toggle('active',mode==='signup');loginTab.setAttribute('aria-pressed',String(mode==='login'));signupTab.setAttribute('aria-pressed',String(mode==='signup'));usernameField.classList.toggle('hidden',mode!=='signup');document.getElementById('resetPasswordBtn').hidden=mode!=='login';document.getElementById('password').autocomplete=mode==='login'?'current-password':'new-password';submitBtn.textContent=mode==='login'?'Log in':mode==='signup'?'Create account':'Save new password';message('')}
 loginTab.addEventListener('click',()=>setMode('login'));signupTab.addEventListener('click',()=>setMode('signup'));
 document.getElementById('resetPasswordBtn').addEventListener('click',async()=>{const emailInput=document.getElementById('email');const email=emailInput.value.trim();if(!email){emailInput.focus();message('Enter your email address first, then choose Forgot password.');return}if(!emailInput.checkValidity()){emailInput.reportValidity();return}const resetBtn=document.getElementById('resetPasswordBtn');resetBtn.disabled=true;message('Sending password-reset email…');try{const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:'https://opeaa1234.github.io/nexora-play/account.html'});if(error)throw error;message('If an account exists for that email, a password-reset link will arrive shortly. Check your inbox and spam folder.')}catch(error){message(error.message||'Could not request a password reset right now. Please try again.')}finally{resetBtn.disabled=false}});
 function validUsername(value){return /^[A-Za-z0-9_]{3,24}$/.test(value)}
@@ -129,7 +129,14 @@ form.addEventListener('submit',async event=>{
  const email=document.getElementById('email').value.trim();
  const password=document.getElementById('password').value;
  try{
-  if(mode==='signup'){
+  if(mode==='recovery'){
+   const {error}=await supabase.auth.updateUser({password});
+   if(error)throw error;
+   await supabase.auth.signOut();
+   setMode('login');
+   await showSession(null);
+   message('Password updated successfully. Log in with your new password.');
+  }else if(mode==='signup'){
    const username=document.getElementById('username').value.trim();
    if(!validUsername(username)){message('Choose a username with 3–24 letters, numbers or underscores.');return}
    const {data,error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:'https://opeaa1234.github.io/nexora-play/account.html',data:{username}}});
@@ -153,7 +160,7 @@ document.getElementById('logoutBtn').addEventListener('click',async()=>{
  document.getElementById('profileStatus').textContent=error?error.message:'You have logged out.';
  if(!error)await showSession(null);
 });
-supabase.auth.onAuthStateChange((_event,session)=>{showSession(session)});
+supabase.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){setMode('recovery');authArea.classList.remove('hidden');signedIn.classList.add('hidden');message('Choose a new password to finish recovering your account.');return}showSession(session)});
 const {data:{session}}=await supabase.auth.getSession();await showSession(session);
 </script>
 </body></html>
