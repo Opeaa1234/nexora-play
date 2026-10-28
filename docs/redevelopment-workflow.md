@@ -21,8 +21,8 @@ For every work cycle:
 
 - **PASS** — Work branch: `redevelopment/phase-2-homepage`.
 - **PASS** — Open draft PR: [#2](https://github.com/Opeaa1234/nexora-play/pull/2).
-- **PASS** — Latest recorded commit: `7b768f5999355aa39147e3eed22cdc88c1176c60` (`Document staging blocker and Supabase advisor findings`).
-- **PASS** — Latest recorded validation run: [GitHub Actions 40749633520](https://github.com/Opeaa1234/nexora-play/actions/runs/40749633520).
+- **PASS** — Latest source commit before this session: `f394e617dd645cd996ac3131fb2bea1b077cc35f`; this session's latest commit is recorded below.
+- **PASS** — Latest confirmed validation run before this session: [GitHub Actions 40751512195](https://github.com/Opeaa1234/nexora-play/actions/runs/40751512195). The new history-integrity fix requires a fresh run before its state can be marked PASS.
 - **NOT TESTED** — Full browser end-to-end tests against a separate staging backend.
 - **NOT TESTED** — Live multiplayer smoke tests after a coordinated database/function/frontend release.
 
@@ -94,3 +94,13 @@ Append a dated entry below after each meaningful work cycle:
 - State: **PASS** for the production-ref deployment safeguard and the workflow/validator source revision. This ledger update is documentation-only.
 - Risks/blockers: no separate staging project is configured; this guard prevents one dangerous misconfiguration but does not provision staging or authorize deployment. No production database or deployment changes were made.
 - Next action: provision or confirm a genuinely separate Supabase staging project, configure staging-only GitHub secrets, then validate the SQL/function/frontend integration there before preparing any separately approved production rollout.
+
+
+### 2026-10-28 — reject Chess moves when saved history is missing
+
+- Change: source review found that the Chess Edge Function and atomic SQL RPC both treated missing saved move history as an empty move list. On an active room with malformed state, that could allow a move to be validated from the starting position and overwrite the saved state. The Edge Function now returns HTTP 409 when saved history is not an array; the SQL RPC independently rejects a missing/non-array history before compare-and-swap.
+- Commits: Edge Function `49e682afc2152a6d960cb065ecc8a01092926ef7`; SQL `e644d3e3271834c6caa4564c7abe3e2758d6f1ef`; validator regression guard `318f274f77e7d3a74955834c115eb064153fcb1d`.
+- Checks: prior branch CI [40751512195](https://github.com/Opeaa1234/nexora-play/actions/runs/40751512195) passed before this fix. CI for `318f274f77e7d3a74955834c115eb064153fcb1d` has not yet been confirmed at the time of this ledger update.
+- State: **NOT YET VERIFIED** for the new source revision pending GitHub Actions. Production database, deployment, and permissions were not changed; the SQL file is a reviewed source change only and still needs staging application/testing.
+- Risks/blockers: staging project and staging-only GitHub secrets remain unavailable/unconfirmed; no production rollout is authorized.
+- Next action: confirm CI for the latest commit, then continue targeted validation and resolve staging prerequisites before any deployment.
