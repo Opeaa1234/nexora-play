@@ -57,6 +57,11 @@ jobs:
             echo "::error::SUPABASE_STAGING_PROJECT_REF must be the 20-character staging project ref."
             exit 1
           fi
+          # Hard stop: never let a misconfigured staging secret deploy to the known live project.
+          if [[ "$SUPABASE_STAGING_PROJECT_REF" == "umcdpqnewicffvvyajef" ]]; then
+            echo "::error::The staging project ref matches Nexora Play production. Refusing deployment."
+            exit 1
+          fi
 
       - name: Set up Supabase CLI
         uses: supabase/setup-cli@v1
