@@ -160,7 +160,8 @@ document.getElementById('logoutBtn').addEventListener('click',async()=>{
  document.getElementById('profileStatus').textContent=error?error.message:'You have logged out.';
  if(!error)await showSession(null);
 });
+const recoveryHash=new URLSearchParams(window.location.hash.slice(1)).get('type')==='recovery';
 supabase.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){setMode('recovery');authArea.classList.remove('hidden');signedIn.classList.add('hidden');message('Choose a new password to finish recovering your account.');return}showSession(session)});
-const {data:{session}}=await supabase.auth.getSession();await showSession(session);
+const {data:{session}}=await supabase.auth.getSession();if(recoveryHash){setMode('recovery');authArea.classList.remove('hidden');signedIn.classList.add('hidden');message('Choose a new password to finish recovering your account.')}else await showSession(session);
 </script>
 </body></html>
