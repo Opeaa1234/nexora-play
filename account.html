@@ -134,19 +134,17 @@ form.addEventListener('submit',async event=>{
    if(error)throw error;
    await supabase.auth.signOut();
    setMode('login');
-   await showSession(null);
    message('Password updated successfully. Log in with your new password.');
   }else if(mode==='signup'){
    const username=document.getElementById('username').value.trim();
    if(!validUsername(username)){message('Choose a username with 3–24 letters, numbers or underscores.');return}
    const {data,error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:'https://opeaa1234.github.io/nexora-play/account.html',data:{username}}});
    if(error)throw error;
-   if(data.session){message('Account created. Setting up your player profile…');await showSession(data.session)}
+   if(data.session){message('Account created. Setting up your player profile…')}
    else{message('Check your email for the confirmation link. Your chosen username is saved with your signup. After confirming, return here and log in.')}
   }else{
    const {data,error}=await supabase.auth.signInWithPassword({email,password});
    if(error)throw error;
-   await showSession(data.session);
   }
  }catch(error){message(error.message||'Something went wrong. Please try again.')}
  finally{submitBtn.disabled=false}
@@ -158,10 +156,10 @@ document.getElementById('saveProfileBtn').addEventListener('click',async()=>{con
 document.getElementById('logoutBtn').addEventListener('click',async()=>{
  const {error}=await supabase.auth.signOut();
  document.getElementById('profileStatus').textContent=error?error.message:'You have logged out.';
- if(!error)await showSession(null);
+ 
 });
 const recoveryHash=new URLSearchParams(window.location.hash.slice(1)).get('type')==='recovery';
-supabase.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){setMode('recovery');authArea.classList.remove('hidden');signedIn.classList.add('hidden');message('Choose a new password to finish recovering your account.');return}showSession(session)});
+supabase.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){setMode('recovery');authArea.classList.remove('hidden');signedIn.classList.add('hidden');message('Choose a new password to finish recovering your account.');return}if(event==='SIGNED_IN'||event==='SIGNED_OUT'){setTimeout(()=>{void showSession(session)},0)}});
 const {data:{session}}=await supabase.auth.getSession();if(recoveryHash){setMode('recovery');authArea.classList.remove('hidden');signedIn.classList.add('hidden');message('Choose a new password to finish recovering your account.')}else await showSession(session);
 </script>
 </body></html>
