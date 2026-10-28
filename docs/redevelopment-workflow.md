@@ -86,3 +86,11 @@ Append a dated entry below after each meaningful work cycle:
 - State: **PASS** for the tested source revision `9952e658ac2d28e574355bc333bf9f51b90f728f`. A subsequent documentation-only ledger commit `725cf68ea25f7d580d6e4e2d5f5634007d751548` is newer and still needs its own CI confirmation.
 - Risks/blockers: staging infrastructure and live integration tests remain blocked; no production changes authorized or performed.
 - Next action: verify CI for the newest branch head, then continue reviewing rule edge cases and staging prerequisites.
+
+### 2026-10-28 — prevent staging deployment to production by misconfiguration
+- Change: hardened `.github/workflows/deploy-staging-chess.yml` to fail if `SUPABASE_STAGING_PROJECT_REF` equals the known live project ref; added a validator guardrail requiring that explicit safety stop.
+- Commits: workflow guard `e88555ae9eb3e9bdc4a7259cdf35140adde78aa8`; validator guardrail `859f4a0a3e948a8c10ab4f99432cc3f5f21f2138`.
+- Checks: preceding CI run [40751187605](https://github.com/Opeaa1234/nexora-play/actions/runs/40751187605) passed for commit `237c2f521798556044ca304ba1618c9409230fc3`, including the new Chess special-move tests. The production-ref safety change is newer and its CI is **PENDING**.
+- State: defense-in-depth safeguard added in source; not yet CI-verified.
+- Risks/blockers: no separate staging project is configured; this guard prevents one dangerous misconfiguration but does not provision staging or authorize deployment. No production database or deployment changes were made.
+- Next action: verify CI for the safety guard and ledger update, then continue source review.
