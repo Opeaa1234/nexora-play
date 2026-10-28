@@ -23,8 +23,8 @@ For every work cycle:
 - **PASS** — Work branch: `redevelopment/phase-2-homepage`.
 - **PASS** — Open draft PR: [#2](https://github.com/Opeaa1234/nexora-play/pull/2).
 - **PASS** — Documentation-only product/design audit PR [#1](https://github.com/Opeaa1234/nexora-play/pull/1) merged as `3b0cda4735b102cd1394bf7a0843d734a63de6cf` after reviewing the complete patch; it contains no runtime code. PR #2 remains draft because multiplayer integration is not yet verified.
-- **PASS** — Latest reviewed branch commit before this ledger entry: `a01f7c7d80ea7827853bda0241ae8fb90db2d06f` (prevents the Draughts renderer from displaying a fabricated initial board when saved state is unavailable).
-- **PASS** — Latest confirmed validation before this ledger entry: [GitHub Actions 40760091479](https://github.com/Opeaa1234/nexora-play/actions/runs/40760091479), passed on commit `a01f7c7d80ea7827853bda0241ae8fb90db2d06f`. Deno type-check, Chess move-validation tests, and project/security guardrails passed. This ledger update will trigger another validation run.
+- **PASS** — Latest reviewed branch commit before this ledger entry: `ed726e7c73dbfb6484a6e4bda2a1e2870cb2d996` (records the renderer safeguard and confirms its CI run).
+- **PASS** — Latest confirmed validation before this ledger entry: [GitHub Actions 40760210197](https://github.com/Opeaa1234/nexora-play/actions/runs/40760210197), passed on commit `ed726e7c73dbfb6484a6e4bda2a1e2870cb2d996`. Deno type-check, Chess move-validation tests, and project/security guardrails passed. This ledger update will trigger another validation run.
 - **NOT TESTED** — Full browser end-to-end tests against a separate staging backend.
 - **NOT TESTED** — Live multiplayer smoke tests after a coordinated database/function/frontend release.
 
