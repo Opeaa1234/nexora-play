@@ -76,6 +76,7 @@ if (!draughtsSql.includes("if v_piece not in ('r','b','R','B')")) fail("Draughts
 if (!draughtsSql.includes("v_turn is distinct from 'r' and v_turn is distinct from 'b'")) fail("Draughts move RPC must reject missing, null, or invalid saved turns");
 if (!draughtsSql.includes("Saved multi-jump state has no available continuation.")) fail("Draughts RPC must reject stale forced multi-jump state instead of allowing a normal move");
 if (!draughtsSql.includes("jsonb_typeof(v_moves) is distinct from 'array'")) fail("Draughts move RPC must reject malformed saved move history");
+if (!draughtsSql.includes("if not (v_room.game_state ? 'moves') then")) fail("Draughts move RPC must reject missing saved move history instead of silently replacing it with an empty array");
 if (!draughtsSql.includes("if p_room_code is null or p_room_code !~ '^[A-Za-z0-9]{6}$' then")) fail("Draughts move RPC must validate room-code input");
 if (!draughtsSql.includes("if p_from is null or p_to is null")) fail("Draughts move RPC must reject null board-square inputs");
 if ((draughtsSql.match(/create or replace function public\.submit_draughts_move\(/g) ?? []).length !== 1) fail("Draughts SQL migration must contain exactly one move RPC definition");
