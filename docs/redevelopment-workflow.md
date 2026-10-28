@@ -21,8 +21,8 @@ For every work cycle:
 
 - **PASS** — Work branch: `redevelopment/phase-2-homepage`.
 - **PASS** — Open draft PR: [#2](https://github.com/Opeaa1234/nexora-play/pull/2).
-- **PASS** — Latest reviewed source/validator commit: `e64e61058d25fcc3ff40d351ef69223a732b02bd` (Draughts saved-history integrity guard).
-- **PASS** — Latest confirmed validation before this ledger entry: [GitHub Actions 40753934995](https://github.com/Opeaa1234/nexora-play/actions/runs/40753934995), successful on ledger commit `2dddb1375a49fc186faa2696dbf92d0e322361a2`. The ledger update itself will trigger a new validation run.
+- **PASS** — Latest reviewed branch commit before this ledger entry: `037b10ffb43d67c6a48eaacc0f4419c76c0ebb67` (ledger update recording the Draughts saved-history integrity fix).
+- **PASS** — Latest confirmed validation before this ledger entry: [GitHub Actions 40754035278](https://github.com/Opeaa1234/nexora-play/actions/runs/40754035278), successful on commit `037b10ffb43d67c6a48eaacc0f4419c76c0ebb67`. This ledger update triggers another validation run.
 - **NOT TESTED** — Full browser end-to-end tests against a separate staging backend.
 - **NOT TESTED** — Live multiplayer smoke tests after a coordinated database/function/frontend release.
 
