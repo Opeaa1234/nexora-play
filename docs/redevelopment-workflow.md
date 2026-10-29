@@ -364,3 +364,12 @@ Append a dated entry below after each meaningful work cycle:
 - Validation: an initial version of the Draughts guard had a JavaScript quoting error and failed CI; the guard was simplified and corrected. The corrected source/guard head passed [push run 40893500412](https://github.com/Opeaa1234/nexora-play/actions/runs/40893500412) and [PR run 40893509003](https://github.com/Opeaa1234/nexora-play/actions/runs/40893509003). Deno type-check, 12 Chess validation tests, and project/security guardrails passed. Browser/two-player behavior remains **NOT TESTED** without isolated staging.
 - Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
 - Next action: verify the workflow-ledger follow-up, then continue multiplayer review. Do not merge until isolated staging and real two-player Chess/Draughts browser tests pass.
+
+### 2026-10-29 — reject impossible Draughts continuation states
+
+- Finding: the live Draughts client checked that a saved forced-capture square was on the board and belonged to the current player, but did not confirm that the piece still had a legal capture. A malformed/stale state could therefore render a playable-looking board whose moves would all be rejected by the authoritative RPC.
+- Change: the client now validates that a forced continuation includes at least one legal capture before exposing the saved board. Added a regression guard to prevent removing this check.
+- Commits: [Draughts client](https://github.com/Opeaa1234/nexora-play/commit/b6022f64d0b112995bdb4b767b5bae0b1e72dfb5), [regression guard](https://github.com/Opeaa1234/nexora-play/commit/42b9204bbcd8d0546a96ac415a312f0e5d2f6fac).
+- Validation: the source/guard head passed [push run 40895542530](https://github.com/Opeaa1234/nexora-play/actions/runs/40895542530) and [PR run 40895551567](https://github.com/Opeaa1234/nexora-play/actions/runs/40895551567). This remains static validation; isolated staging and two-player browser testing are still outstanding.
+- Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
+- Next action: verify CI on this ledger follow-up and continue reviewing lobby/session and multiplayer rules. Do not merge until isolated staging and real two-player Chess/Draughts tests pass.
