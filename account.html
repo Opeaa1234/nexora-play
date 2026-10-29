@@ -114,13 +114,14 @@ async function showSession(session){
  }
  if(renderVersion!==sessionRenderVersion)return;
  document.getElementById('playerName').textContent=profileName;
- await loadPersonalBests(session.user.id);
+ await loadPersonalBests(session.user.id,renderVersion);
 }
-async function loadPersonalBests(userId){
+async function loadPersonalBests(userId,renderVersion){
  const target=document.getElementById('personalBests');
  if(!target)return;
  target.textContent='Loading personal bests…';
  const {data,error}=await supabase.from('player_best_scores').select('game_id,best_score,updated_at').eq('user_id',userId).order('best_score',{ascending:false});
+ if(renderVersion!==sessionRenderVersion)return;
  if(error){target.textContent='Scores will appear here once score saving is available.';console.error('Could not load personal bests:',error.message);return}
  if(!data||data.length===0){target.textContent='No saved scores yet. Play Space Defender while logged in to record your first personal best.';return}
  const names={'space-defender':'Space Defender'};
