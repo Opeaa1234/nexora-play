@@ -93,21 +93,26 @@ function setMode(next){mode=next;loginTab.classList.toggle('active',mode==='logi
 loginTab.addEventListener('click',()=>setMode('login'));signupTab.addEventListener('click',()=>setMode('signup'));
 document.getElementById('resetPasswordBtn').addEventListener('click',async()=>{const emailInput=document.getElementById('email');const email=emailInput.value.trim();if(!email){emailInput.focus();message('Enter your email address first, then choose Forgot password.');return}if(!emailInput.checkValidity()){emailInput.reportValidity();return}const resetBtn=document.getElementById('resetPasswordBtn');resetBtn.disabled=true;message('Sending password-reset email…');try{const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:'https://opeaa1234.github.io/nexora-play/account.html'});if(error)throw error;message('If an account exists for that email, a password-reset link will arrive shortly. Check your inbox and spam folder.')}catch(error){message(error.message||'Could not request a password reset right now. Please try again.')}finally{resetBtn.disabled=false}});
 function validUsername(value){return /^[A-Za-z0-9_]{3,24}$/.test(value)}
+let sessionRenderVersion=0;
 async function showSession(session){
+ const renderVersion=++sessionRenderVersion;
  if(!session){authArea.classList.remove('hidden');signedIn.classList.add('hidden');return}
  authArea.classList.add('hidden');signedIn.classList.remove('hidden');
  document.getElementById('playerEmail').textContent=session.user.email||'Signed-in player';
  const fallback=(session.user.email||'Player').split('@')[0].replace(/[^A-Za-z0-9_]/g,'_').slice(0,24);
  let profileName=session.user.user_metadata?.username||fallback||'Player';
  const {data,error}=await supabase.from('player_profiles').select('username,display_name,avatar_url').eq('id',session.user.id).maybeSingle();
+ if(renderVersion!==sessionRenderVersion)return;
  if(error){document.getElementById('profileStatus').textContent='You are signed in, but we could not load your profile: '+error.message;document.getElementById('playerName').textContent=profileName;return}
  if(data?.username){profileName=data.display_name||data.username;document.getElementById('displayNameInput').value=data.display_name||data.username;document.getElementById('avatarUrl').value=data.avatar_url||'';if(data.avatar_url)document.getElementById('avatarPreview').src=data.avatar_url}
  else {
   const candidate=validUsername(profileName)?profileName:('Player_'+session.user.id.slice(0,8));
   const {error:insertError}=await supabase.from('player_profiles').insert({id:session.user.id,username:candidate,display_name:candidate});
+  if(renderVersion!==sessionRenderVersion)return;
   if(insertError){document.getElementById('profileStatus').textContent='You are signed in, but your username could not be saved ('+insertError.message+'). We can fix this next.'}
   else {profileName=candidate;document.getElementById('displayNameInput').value=candidate;document.getElementById('profileStatus').textContent='Your player profile is ready.'}
  }
+ if(renderVersion!==sessionRenderVersion)return;
  document.getElementById('playerName').textContent=profileName;
  await loadPersonalBests(session.user.id);
 }
