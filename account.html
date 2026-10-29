@@ -107,9 +107,10 @@ async function showSession(session){
  document.getElementById('avatarUrl').value='';
  document.getElementById('avatarPreview').src='https://placehold.co/120x120/102b59/ffffff?text=NP';
  document.getElementById('profileStatus').textContent='Loading player profile…';
+ document.getElementById('personalBests').textContent='Loading personal bests for this account…';
  const {data,error}=await supabase.from('player_profiles').select('username,display_name,avatar_url').eq('id',session.user.id).maybeSingle();
  if(renderVersion!==sessionRenderVersion)return;
- if(error){document.getElementById('profileStatus').textContent='You are signed in, but we could not load your profile: '+error.message;document.getElementById('playerName').textContent=profileName;return}
+ if(error){document.getElementById('profileStatus').textContent='You are signed in, but we could not load your profile: '+error.message;document.getElementById('playerName').textContent=profileName;document.getElementById('personalBests').textContent='Personal bests are unavailable because this account profile could not be loaded.';return}
  if(data?.username){profileName=data.display_name||data.username;document.getElementById('displayNameInput').value=data.display_name||data.username;document.getElementById('avatarUrl').value=data.avatar_url||'';if(data.avatar_url)document.getElementById('avatarPreview').src=data.avatar_url}
  else {
   const candidate=validUsername(profileName)?profileName:('Player_'+session.user.id.slice(0,8));
