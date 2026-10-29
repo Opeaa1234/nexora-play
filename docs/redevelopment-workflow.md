@@ -198,3 +198,12 @@ Append a dated entry below after each meaningful work cycle:
 - Commits: account fix `5ca48802deac30511d4f6200ff8af30a4870945b`; validator guard `9dc1533906594c33c61ab23216b5ab3cdbe90df8`.
 - Validation: [GitHub Actions run 40869399534](https://github.com/Opeaa1234/nexora-play/actions/runs/40869399534) passed on ledger commit `0ca8e64200e97bd2ca6c4b984e2e7cac8327f6d3`; the account and validator commits also passed runs 40869372253 and 40869391956 respectively. Deno type-check, Chess move-validation tests, and static project/security guards passed. Browser-level race testing still requires isolated staging.
 - Safety: no production SQL, Supabase settings, permissions, deployments, or live data were changed. PR #2 remains draft pending staging and two-player E2E verification.
+
+
+### 2026-10-29 — guard room lobby against stale auth and room queries
+
+- Finding: the lobby reran its account check for every Supabase auth event and could keep a realtime subscription after sign-out. Overlapping room-list requests could also finish after an account transition and render results for the previous user.
+- Change: versioned lobby session transitions and room-list requests; only sign-in/sign-out events now trigger the transition handler, stale query/realtime results are ignored, and the lobby removes its realtime channel on sign-out. Added static regression guards in `scripts/validate-project.mjs`.
+- Commits: lobby fix `69ec9ce0a9ca4632be7dd50388b5901979b74678`; regression guards `7e5c3321a10c10ea100dd68f2474d34afd57f321` and `f947ee6ecf79222a16aa506ee99f98caf7d7d20b`.
+- Checks: CI for these changes and this ledger update is pending; do not mark validation passed until GitHub Actions confirms the latest branch head.
+- Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. Real auth/realtime behavior remains untested until an isolated staging backend is available. PR #2 remains draft.
