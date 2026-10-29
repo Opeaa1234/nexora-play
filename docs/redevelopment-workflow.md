@@ -215,3 +215,10 @@ Append a dated entry below after each meaningful work cycle:
 - Change: both game clients now invalidate pending room reads, remove their realtime channel, clear the displayed game state, and prompt the player to sign in and reopen the room when the current user signs out or switches accounts. Draughts refresh safely returns when no room is active. Added static regression guards.
 - Checks: [GitHub Actions run 40871412259](https://github.com/Opeaa1234/nexora-play/actions/runs/40871412259) and [PR run 40871418809](https://github.com/Opeaa1234/nexora-play/actions/runs/40871418809) passed on commit `7b94c8739379fc43980073983eabe0c925316d1c`. The static-validation job passed Deno type-check, all Chess move-validation tests, and page/multiplayer security guardrails. This does not substitute for staging tests with two authenticated users.
 - Safety: no production SQL, Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft pending isolated staging and multiplayer E2E verification.
+
+### 2026-10-29 — prevent stale startup from restoring a signed-out board
+
+- Finding: the previous auth teardown invalidated room refreshes, but a room lookup already in flight during initial page startup could still finish after sign-out, assign the room again, and recreate a realtime subscription. That leaves a narrow auth-transition race in both game pages.
+- Change: introduced a separate auth-session generation counter. Chess and Draughts startup now checks it after each awaited session/room lookup and after initial sync before subscribing, and discards work belonging to an obsolete user session. Added static regression guards.
+- Status: source and validator changes committed; CI for the updated branch head must be confirmed. This does not replace live staging/browser verification.
+- Safety: no production SQL, Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft.
