@@ -302,3 +302,11 @@ Append a dated entry below after each meaningful work cycle:
 - No SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
 
 - Validation confirmation: source commit `f6556c65dec2a15882c3cb40c811994289837acc` passed push run [40887039603](https://github.com/Opeaa1234/nexora-play/actions/runs/40887039603); guard commit `d81ec3e3ffaf361300db7916eee81678df8fe79d` passed push run [40887076679](https://github.com/Opeaa1234/nexora-play/actions/runs/40887076679) and PR run [40887083757](https://github.com/Opeaa1234/nexora-play/actions/runs/40887083757). Ledger head `6b359742a2f67fa574d83de325b86f72e690a104` passed push run [40887124094](https://github.com/Opeaa1234/nexora-play/actions/runs/40887124094) and PR run [40887132921](https://github.com/Opeaa1234/nexora-play/actions/runs/40887132921). Static validation, Deno type-check, Chess validation tests, and project/security guards passed; browser rule behavior remains **NOT TESTED**.
+
+### 2026-10-29 — clear profile fields when switching accounts
+
+- Finding: when a different account signed in, the account page updated the email but could leave the previous user's display name and avatar URL visible while the new profile query was pending. If the new account had no profile or its query failed, those old fields could remain in the form.
+- Change: each signed-in profile render now immediately replaces the visible player name with the new account's fallback name, clears the display-name and avatar inputs, restores the neutral avatar placeholder, and shows a loading status before querying that account's profile. Added a static regression guard.
+- Commits: [account fix](https://github.com/Opeaa1234/nexora-play/commit/ac76f6201b6a11d2d47a37231192bad947ee6dd7), [validator guard](https://github.com/Opeaa1234/nexora-play/commit/a891303e1fbb0281aab44e8d6c9840b60fc9179d).
+- Validation: CI for this source/guard/ledger sequence is being checked. This protects against stale cross-account UI data but still needs browser verification with two real test accounts in isolated staging.
+- Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
