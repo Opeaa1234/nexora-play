@@ -220,5 +220,5 @@ Append a dated entry below after each meaningful work cycle:
 
 - Finding: the previous auth teardown invalidated room refreshes, but a room lookup already in flight during initial page startup could still finish after sign-out, assign the room again, and recreate a realtime subscription. That leaves a narrow auth-transition race in both game pages.
 - Change: introduced a separate auth-session generation counter. Chess and Draughts startup now checks it after each awaited session/room lookup and after initial sync before subscribing, and discards work belonging to an obsolete user session. Added static regression guards.
-- Status: source and validator changes committed; CI for the updated branch head must be confirmed. This does not replace live staging/browser verification.
+- Checks: [push run 40872109850](https://github.com/Opeaa1234/nexora-play/actions/runs/40872109850) and [PR run 40872113632](https://github.com/Opeaa1234/nexora-play/actions/runs/40872113632) passed on commit `4f7e12b5f5881197e1127e004c7b816bd378280e`. Static validation passed Deno type-check, Chess move-validation tests, and page/multiplayer security guardrails. This does not replace live staging/browser verification.
 - Safety: no production SQL, Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft.
