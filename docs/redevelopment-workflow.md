@@ -239,3 +239,12 @@ Append a dated entry below after each meaningful work cycle:
 - Commits: [account fix](https://github.com/Opeaa1234/nexora-play/commit/663a72b095587db744cee285581b482cf1b65228), [regression guards](https://github.com/Opeaa1234/nexora-play/commit/3a226b4f7a80920261619de296d81e3fecd51fa0).
 - Checks: [push run 40873403132](https://github.com/Opeaa1234/nexora-play/actions/runs/40873403132) and [PR run 40873415665](https://github.com/Opeaa1234/nexora-play/actions/runs/40873415665) **PASSED** on source/guard/ledger head `1ba977de665ec0addb70512d6388307111d6b878`, including Deno type-check, 12 Chess validation tests, and project/security guards. An earlier PR run caught the expected old auth-listener string in a static guard; the guard was updated to assert the synchronous invalidation behavior, and subsequent push/PR runs passed. Real auth behavior remains **NOT TESTED** in a browser because isolated staging is not available.
 - Safety: no production SQL, permissions, Auth settings, deployments, or live data changed. PR #2 remains draft and unmerged.
+
+
+### 2026-10-29 — ignore stale multiplayer move completions after auth changes
+- Finding: Chess and Draughts cleared the board and realtime subscription on sign-out, but an already-submitted move request could still resolve afterward and overwrite the new session's status message (for example, displaying “Move saved” after the signed-out prompt). Its `finally` block could also repaint or reset the busy flag after teardown.
+- Change: both move handlers capture the auth generation and only report success/errors or run UI cleanup if that generation is still current. Added static regression guards for both clients.
+- Commits: Chess `6d0e19ca8b1fbc29c97d8184948980d62b205a37`; Draughts `fad4b54a12c7347582b29228a01fdb0bf63a7ef2`; regression guard `d38323beff5ec6e11a72696cbe94a4e4918c7e4c`.
+- Checks: CI pending for the new head; do not treat this source guard as browser verification. Auth-transition behavior during an in-flight move remains **NOT TESTED** without isolated staging and two authenticated users.
+- Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
+- Next action: check push and PR Actions for this head, then continue the targeted source review and staging prerequisites.
