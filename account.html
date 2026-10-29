@@ -96,7 +96,17 @@ function validUsername(value){return /^[A-Za-z0-9_]{3,24}$/.test(value)}
 let sessionRenderVersion=0;
 async function showSession(session){
  const renderVersion=++sessionRenderVersion;
- if(!session){authArea.classList.remove('hidden');signedIn.classList.add('hidden');return}
+ if(!session){
+  authArea.classList.remove('hidden');signedIn.classList.add('hidden');
+  document.getElementById('playerEmail').textContent='';
+  document.getElementById('playerName').textContent='Player';
+  document.getElementById('displayNameInput').value='';
+  document.getElementById('avatarUrl').value='';
+  document.getElementById('avatarPreview').src='https://placehold.co/120x120/102b59/ffffff?text=NP';
+  document.getElementById('profileStatus').textContent='';
+  document.getElementById('personalBests').textContent='Sign in to view personal bests.';
+  return
+}
  authArea.classList.add('hidden');signedIn.classList.remove('hidden');
  document.getElementById('playerEmail').textContent=session.user.email||'Signed-in player';
  const fallback=(session.user.email||'Player').split('@')[0].replace(/[^A-Za-z0-9_]/g,'_').slice(0,24);
