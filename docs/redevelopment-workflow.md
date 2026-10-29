@@ -182,3 +182,11 @@ Append a dated entry below after each meaningful work cycle:
 - State: **PASS** for static validation. Real auth callback behavior is still **NOT TESTED** against staging; no live database or production deployment was changed.
 - Risks/blockers: separate staging Supabase project and staging-only GitHub secrets are still missing; PR #2 remains draft until backend integration and two-player E2E tests pass.
 - Next action: continue targeted review of auth/profile state transitions, then resolve staging prerequisites before environment-backed testing.
+
+### 2026-10-29 — discard stale account session renders
+
+- Finding: although auth-state rendering is now limited to sign-in/sign-out events, `showSession` performs asynchronous profile reads and potentially a profile insert. If a user signs out or another session event occurs while an earlier profile request is pending, that older request could finish later and restore stale account UI or personal-best data.
+- Change: added a monotonically increasing session-render version. Each session transition invalidates earlier profile work; stale profile-read/insert results are discarded before they can update the UI. Added static regression guards in `scripts/validate-project.mjs`.
+- Commits: account guard and validator guard are recorded in the branch history; CI result pending at time of this note.
+- Validation: static source guard added. Wait for the branch's new GitHub Actions run before treating CI as passed. Browser-level auth races remain unverified until a separate staging Supabase environment is available.
+- Safety: no SQL, production Supabase settings, deployments, permissions, or live data were changed. PR #2 remains draft; do not merge until backend integration and two-player E2E tests pass.
