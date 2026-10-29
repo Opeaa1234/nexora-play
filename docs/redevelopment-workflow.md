@@ -292,3 +292,11 @@ Append a dated entry below after each meaningful work cycle:
 - Commits: [Chess](https://github.com/Opeaa1234/nexora-play/commit/48cb61d32b323c6ca47fcff9de87bbc8d90f8142), [Draughts](https://github.com/Opeaa1234/nexora-play/commit/8aa6c9ae5b072880454d87f73c50c706f20d47ae), [validator](https://github.com/Opeaa1234/nexora-play/commit/6059ce5fc39a7ff6709f9350c655b7f7439cd431).
 - CI for the source/guard/ledger head is pending verification; actual auth transitions and rejected refreshes remain **NOT TESTED** in a real browser.
 - No production SQL, Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
+
+
+## Local Draughts promotion rule — 2026-10-29
+- Source review found that local two-player and computer Draughts continued a multi-jump after a man reached the king row. Under English/American draughts rules, crowning ends that capture turn; continuing as a king allowed an extra capture not permitted by the server-side move logic.
+- Both local move handlers now detect a newly crowned piece and end its turn immediately; added static regression guards for the human and computer paths.
+- Commits: [Draughts practice fix](https://github.com/Opeaa1234/nexora-play/commit/f6556c65dec2a15882c3cb40c811994289837acc), [regression guard](https://github.com/Opeaa1234/nexora-play/commit/d81ec3e3ffaf361300db7916eee81678df8fe79d).
+- CI for this source/guard/ledger head is pending verification. Rule behavior has not been browser-tested; isolated staging and two-player multiplayer tests remain blocked.
+- No SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
