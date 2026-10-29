@@ -328,3 +328,12 @@ Append a dated entry below after each meaningful work cycle:
 - Validation: prior head `09ffe9979bb7d79234df3179f66e1fbfff873bb5` passed both push and PR CI. New head CI is pending for this follow-up. Browser verification with two isolated staging accounts remains outstanding.
 - Safety: no production SQL, Supabase settings, permissions, deployments, or live data changed. PR #2 remains open, draft, and unmerged.
 - Next action: verify the new head's push and PR Actions, then continue multiplayer review. Do not merge until isolated staging and real two-player Chess/Draughts browser tests pass.
+
+### 2026-10-29 — fail closed on missing Chess history in waiting rooms
+
+- Finding: Chess already rejected missing saved move history for active/finished rooms, but a waiting room with missing history could fall through to `replay([])` and display a reconstructed initial board. That conflicted with the fail-closed behavior documented for multiplayer state and could mask a broken room record until the first move.
+- Change: the Chess client now rejects missing or malformed saved move history in every room state and only replays a validated saved array. Added a regression guard against restoring the empty-history fallback.
+- Commits: [Chess client](https://github.com/Opeaa1234/nexora-play/commit/1abb7203cf88cb5a2dfed070d047874e9190f424), [regression guard](https://github.com/Opeaa1234/nexora-play/commit/1cbc201b6915e91ffb5355072306b8e613eb51e9).
+- Validation: the intermediate source-only run failed as expected because the old static guard still required the previous error text ([run 40891643386](https://github.com/Opeaa1234/nexora-play/actions/runs/40891643386)); the guard was updated in the next commit. Verify the new push and PR runs before considering this fix validated. This is a static change; browser and two-player behavior remain **NOT TESTED** without isolated staging.
+- Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
+- Next action: confirm CI on the regression-guard commit and its ledger follow-up, then continue reviewing multiplayer state and sync paths. Do not merge until staging and real two-player Chess/Draughts browser tests pass.
