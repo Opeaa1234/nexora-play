@@ -257,3 +257,12 @@ Append a dated entry below after each meaningful work cycle:
 - Checks: [push run 40874352273](https://github.com/Opeaa1234/nexora-play/actions/runs/40874352273) and [PR run 40874355891](https://github.com/Opeaa1234/nexora-play/actions/runs/40874355891) **PASSED** on the latest ledger head `9d40db4042c327929698c96c1705d9a06d016e7c`; the lobby source and guard also passed [40874284019](https://github.com/Opeaa1234/nexora-play/actions/runs/40874284019), [40874293296](https://github.com/Opeaa1234/nexora-play/actions/runs/40874293296), and guard run [40874344308](https://github.com/Opeaa1234/nexora-play/actions/runs/40874344308). Deno type-check, Chess validation tests, and project/security guardrails passed. Shared-browser and auth behavior remain **NOT TESTED** without staging. Follow-up ledger commit `f04590cebbd9bae88f42650e159a445ff62b0b20` also passed both [push run 40874433863](https://github.com/Opeaa1234/nexora-play/actions/runs/40874433863) and [PR run 40874440000](https://github.com/Opeaa1234/nexora-play/actions/runs/40874440000).
 - Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
 - Next action: verify CI, then continue the staging readiness checklist. Do not merge until isolated staging and two-player browser tests pass.
+
+
+### 2026-10-29 — suppress stale room creation errors
+- Finding: room creation checked the auth generation after each insert result, but a thrown/rejected request could enter the catch block and display an error after sign-out or account switching. That could overwrite the new session's lobby status.
+- Change: the catch block now reports the failure only when both the captured session generation and user ID are still current. Added a static regression guard.
+- Commits: room lobby `5f98349abb624830a116356acc1018a4845f64c8`; regression guard `ac98b22ab8315c140ca19bf574cb1020fda7d7c1`.
+- Checks: CI pending for the new source/guard/ledger head. This is a source-level correction; rejected network requests during auth changes are **NOT TESTED** in browser.
+- Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
+- Next action: verify push and PR Actions, then continue staging readiness and browser verification.
