@@ -275,3 +275,12 @@ Append a dated entry below after each meaningful work cycle:
 - Checks: CI for this source/guard/ledger update is pending; browser behavior for rejected RPCs and auth transitions remains **NOT TESTED** without isolated staging.
 - Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
 - Next action: verify push and PR checks, then continue safe source review; do not merge until staging and two-player browser tests pass.
+
+
+### 2026-10-29 — suppress stale multiplayer startup errors
+- Finding: Chess and Draughts startup tasks check auth generations after successful awaits, but a rejected session/room lookup could still reach the outer startup catch after sign-out or account switching and overwrite the newer session message.
+- Change: capture the auth generation when starting each page and display startup errors only while that generation remains current. Added a static regression guard for both pages.
+- Commits: Chess `ef27c4ed20e1b0f835db1328546f3dae8ff3e552`; Draughts `5e6b699261cd3e0b5bb02402022d73b5c9f93563`; guard `73840469046fd2238ae69212734f7d9897530ee2`.
+- Checks: CI for the source/guard/ledger head is pending. Rejected lookup behavior and account transitions remain **NOT TESTED** in a real browser.
+- Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
+- Next action: verify CI and continue staging readiness; do not merge until isolated staging and two-player browser tests pass.
