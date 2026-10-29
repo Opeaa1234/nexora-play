@@ -132,6 +132,10 @@ if (!roomsHtml.includes("data-open=") || !roomsHtml.includes("data-join=")) fail
 if (!roomsHtml.includes(".or('is_public.eq.true,host_id.eq.'+user.id)")) fail("Room list must include the signed-in host's own private waiting rooms as well as public rooms");
 if (!roomsHtml.includes("multiplayer-draughts.html") || !roomsHtml.includes("multiplayer-chess.html")) fail("Room actions must route to the selected multiplayer game");
 if (!roomsHtml.includes("function initialDraughtsState()")) fail("New Draughts rooms must persist a valid initial board before the guest joins");
+if (!roomsHtml.includes("sessionVersion=0") || !roomsHtml.includes("if(version!==sessionVersion)return")) fail("Room lobby must invalidate stale asynchronous session and room-list work after auth transitions");
+if (!/async function loadRooms\\(version=sessionVersion\\)[\\s\\S]*?if\\(version!==sessionVersion\\|\\|user\\?\\.id!==requestedUser\\.id\\)return/.test(roomsHtml)) fail("Room list responses must not overwrite the lobby after sign-out or account switching");
+if (!roomsHtml.includes("event==='SIGNED_IN'||event==='SIGNED_OUT'") || !roomsHtml.includes("supabase.removeChannel(channel);channel=null")) fail("Room lobby must react to session changes safely and release its realtime subscription on sign-out");
+if (!roomsHtml.includes("if(version===sessionVersion)void loadRooms(version)")) fail("Room realtime callbacks must be ignored after their session subscription becomes stale");
 if (!roomsHtml.includes("gameType==='draughts'?initialDraughtsState():{version:1,stage:'waiting',moves:[]}")) fail("New rooms must initialize Draughts boards and Chess move histories before becoming active");
 if (roomsHtml.includes("Room hosting and joining will be enabled after the database setup is completed.")) fail("Room lobby must not display a stale disabled-feature message after setup");
 
