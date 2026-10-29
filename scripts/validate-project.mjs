@@ -115,6 +115,9 @@ if (chessSql.includes("create or replace function public.submit_chess_move")) fa
 
 
 const draughtsHtml = pages.get("multiplayer-draughts.html")?.source ?? "";
+const localDraughtsHtml = pages.get("draughts.html")?.source ?? "";
+if (!localDraughtsHtml.includes("const piece=board[move.from],wasKing=piece.king;") || !localDraughtsHtml.includes("const promoted=!wasKing&&piece.king;moves++;selected=null;if(move.capture!==null&&!promoted&&capturesFrom(move.to).length)")) fail("Local Draughts must end a capturing turn when a man is crowned, rather than continuing the jump as a king");
+if (!localDraughtsHtml.includes("const piece=board[choice.from],wasKing=piece.king;") || !localDraughtsHtml.includes("const promoted=!wasKing&&piece.king;moves++;if(choice.capture!==null&&!promoted&&capturesFrom(choice.to).length)")) fail("Computer Draughts must end a capturing turn when a man is crowned, matching the server move rules");
 if (!draughtsHtml.includes(".sq:focus-visible")) fail("Live Draughts board must show a visible keyboard focus indicator");
 if (!draughtsHtml.includes("const square=String.fromCharCode(97+i%8)+(8-Math.floor(i/8))")) fail("Live Draughts squares must use standard coordinates in accessible labels");
 if (!draughtsHtml.includes("p===p.toUpperCase()?'king':'man'")) fail("Live Draughts square labels must announce piece type");
