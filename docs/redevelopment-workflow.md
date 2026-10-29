@@ -346,3 +346,12 @@ Append a dated entry below after each meaningful work cycle:
 - Validation: an initial version of the new static guard had a JavaScript quoting error and failed CI; the guard was corrected. The corrected source/guard head passed both [push run 40892417942](https://github.com/Opeaa1234/nexora-play/actions/runs/40892417942) and [PR run 40892430166](https://github.com/Opeaa1234/nexora-play/actions/runs/40892430166). Deno type-check, 12 Chess validation tests, and project/security guardrails passed. Browser and two-player behavior remain **NOT TESTED** without isolated staging.
 - Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
 - Next action: verify CI on this ledger follow-up, then continue the multiplayer source audit. Do not merge until staging and real two-player Chess/Draughts browser tests pass.
+
+### 2026-10-29 — distinguish Chess save failures from refresh failures
+
+- Finding: after the server accepted a Chess move, a subsequent room refresh failure fell into the same error handler as a rejected move and told the player “Move not saved.” That was misleading and could prompt an unnecessary retry even though the move had already been committed.
+- Change: the client now tracks whether the server accepted the move and reports a separate refresh/reload message if syncing the updated position fails. Added a regression guard for this distinction and retained auth-generation checks so stale responses cannot overwrite newer session feedback.
+- Commits: [Chess client](https://github.com/Opeaa1234/nexora-play/commit/c4e7beedd7c71a6bdb5cb5dce28836443d2a0d56), [regression guard](https://github.com/Opeaa1234/nexora-play/commit/86c417c3c15142e217271c192b92c0d49fcc4b07).
+- Validation: source/guard head passed [push run 40892834250](https://github.com/Opeaa1234/nexora-play/actions/runs/40892834250) and [PR run 40892855511](https://github.com/Opeaa1234/nexora-play/actions/runs/40892855511). Deno type-check, 12 Chess validation tests, and project/security guardrails passed. This remains source-level validation; browser behavior is **NOT TESTED** without isolated staging.
+- Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
+- Next action: verify the ledger follow-up's CI, then continue checking the multiplayer sync/turn paths. Do not merge until staging and real two-player Chess/Draughts browser tests pass.
