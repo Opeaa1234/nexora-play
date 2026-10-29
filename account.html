@@ -101,6 +101,12 @@ async function showSession(session){
  document.getElementById('playerEmail').textContent=session.user.email||'Signed-in player';
  const fallback=(session.user.email||'Player').split('@')[0].replace(/[^A-Za-z0-9_]/g,'_').slice(0,24);
  let profileName=session.user.user_metadata?.username||fallback||'Player';
+ // Clear the previous account's profile immediately; a new user's profile query may take time or fail.
+ document.getElementById('playerName').textContent=profileName;
+ document.getElementById('displayNameInput').value='';
+ document.getElementById('avatarUrl').value='';
+ document.getElementById('avatarPreview').src='https://placehold.co/120x120/102b59/ffffff?text=NP';
+ document.getElementById('profileStatus').textContent='Loading player profile…';
  const {data,error}=await supabase.from('player_profiles').select('username,display_name,avatar_url').eq('id',session.user.id).maybeSingle();
  if(renderVersion!==sessionRenderVersion)return;
  if(error){document.getElementById('profileStatus').textContent='You are signed in, but we could not load your profile: '+error.message;document.getElementById('playerName').textContent=profileName;return}
