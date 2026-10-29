@@ -319,3 +319,12 @@ Append a dated entry below after each meaningful work cycle:
 - Validation: CI for these commits and the ledger update is pending. This is a source-level privacy guard; real account-switch behavior still needs two test accounts in isolated staging.
 - Safety: no production SQL, Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
 - Next action: verify push and PR Actions for the updated head, then continue targeted account/multiplayer review. Do not merge until isolated staging and real two-player Chess/Draughts browser tests pass.
+
+
+### 2026-10-29 — clear account identity and dashboard data on sign-out
+- Finding: the signed-out branch hid the signed-in panel but left the previous player's email, display name, avatar URL, profile status, and personal-best content in the document. This was hidden UI, but retaining account-specific data after logout was unnecessary and risked stale data resurfacing in future UI changes.
+- Change: the signed-out session render now clears identity/profile fields, restores the neutral avatar, clears profile status, and replaces personal bests with a sign-in prompt. Added a static regression guard.
+- Commits: account fix `d8a6e3f082b7fb0533bbf2eaa4db92bd42947be7`; validator guard `6e9446c46d1278d1b13947d30bd93ff0ebbaaea2`.
+- Validation: prior head `09ffe9979bb7d79234df3179f66e1fbfff873bb5` passed both push and PR CI. New head CI is pending for this follow-up. Browser verification with two isolated staging accounts remains outstanding.
+- Safety: no production SQL, Supabase settings, permissions, deployments, or live data changed. PR #2 remains open, draft, and unmerged.
+- Next action: verify the new head's push and PR Actions, then continue multiplayer review. Do not merge until isolated staging and real two-player Chess/Draughts browser tests pass.
