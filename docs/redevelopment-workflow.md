@@ -310,3 +310,12 @@ Append a dated entry below after each meaningful work cycle:
 - Commits: [account fix](https://github.com/Opeaa1234/nexora-play/commit/ac76f6201b6a11d2d47a37231192bad947ee6dd7), [validator guard](https://github.com/Opeaa1234/nexora-play/commit/a891303e1fbb0281aab44e8d6c9840b60fc9179d).
 - Validation: CI for this source/guard/ledger sequence is being checked. This protects against stale cross-account UI data but still needs browser verification with two real test accounts in isolated staging.
 - Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
+
+
+### 2026-10-29 — clear personal-best dashboard data on account switches
+- Finding: the profile fields were cleared when switching accounts, but the personal-best panel could continue showing the previous player's scores while the new profile query was pending. If that profile query failed, the old scores could remain visible indefinitely.
+- Change: each profile render now replaces the personal-best panel immediately with account-specific loading text; a profile-load error leaves an explicit unavailable message rather than stale scores. Added a static regression guard.
+- Commits: account fix `b080ec3354b9f6f076b6de8459492f621dfd76fd`; validator guard `d5af427e5e55dfa8ce4cc391762a341be12949eb`.
+- Validation: CI for these commits and the ledger update is pending. This is a source-level privacy guard; real account-switch behavior still needs two test accounts in isolated staging.
+- Safety: no production SQL, Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
+- Next action: verify push and PR Actions for the updated head, then continue targeted account/multiplayer review. Do not merge until isolated staging and real two-player Chess/Draughts browser tests pass.
