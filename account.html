@@ -50,13 +50,14 @@ h1{font-size:clamp(1.8rem,4vw,2.7rem);line-height:1.1;margin-bottom:10px} .panel
 <h1>Your player account</h1>
 <p>Sign in to Nexora Play or create an account to get started.</p>
 <div id="authArea">
-<div class="tabs" role="tablist" aria-label="Account action"><button type="button" id="loginTab" class="active">Log in</button><button type="button" id="signupTab">Create account</button></div>
+<div class="tabs" role="group" aria-label="Account action"><button type="button" id="loginTab" class="active" aria-pressed="true">Log in</button><button type="button" id="signupTab" aria-pressed="false">Create account</button></div>
 <form id="authForm">
 <div class="field"><label for="email">Email address</label><input id="email" type="email" autocomplete="email" required placeholder="you@example.com"></div>
 <div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" minlength="8" required placeholder="At least 8 characters"></div>
 <div id="usernameField" class="field hidden"><label for="username">Choose a username</label><input id="username" autocomplete="username" maxlength="24" pattern="[A-Za-z0-9_]{3,24}" placeholder="3–24 letters, numbers or underscores"><div class="hint">Use 3–24 letters, numbers or underscores.</div></div>
 <button class="primary" id="submitBtn" type="submit">Log in</button>
 </form>
+<button type="button" id="resetPasswordBtn" class="small" style="display:block;width:100%;background:transparent;border:0;color:#7de5ff;text-decoration:underline">Forgot password?</button>
 <div id="status" class="status" role="status" aria-live="polite"></div>
 </div>
 <div id="signedIn" class="hidden">
@@ -88,32 +89,56 @@ const loginTab=document.getElementById('loginTab'),signupTab=document.getElement
 const usernameField=document.getElementById('usernameField'),submitBtn=document.getElementById('submitBtn');
 let mode='login';
 function message(text){status.textContent=text}
-function setMode(next){mode=next;loginTab.classList.toggle('active',mode==='login');signupTab.classList.toggle('active',mode==='signup');usernameField.classList.toggle('hidden',mode!=='signup');document.getElementById('password').autocomplete=mode==='login'?'current-password':'new-password';submitBtn.textContent=mode==='login'?'Log in':'Create account';message('')}
+function setMode(next){mode=next;loginTab.classList.toggle('active',mode==='login');signupTab.classList.toggle('active',mode==='signup');loginTab.setAttribute('aria-pressed',String(mode==='login'));signupTab.setAttribute('aria-pressed',String(mode==='signup'));usernameField.classList.toggle('hidden',mode!=='signup');document.getElementById('resetPasswordBtn').hidden=mode!=='login';document.getElementById('password').autocomplete=mode==='login'?'current-password':'new-password';submitBtn.textContent=mode==='login'?'Log in':mode==='signup'?'Create account':'Save new password';message('')}
 loginTab.addEventListener('click',()=>setMode('login'));signupTab.addEventListener('click',()=>setMode('signup'));
+document.getElementById('resetPasswordBtn').addEventListener('click',async()=>{const emailInput=document.getElementById('email');const email=emailInput.value.trim();if(!email){emailInput.focus();message('Enter your email address first, then choose Forgot password.');return}if(!emailInput.checkValidity()){emailInput.reportValidity();return}const resetBtn=document.getElementById('resetPasswordBtn');resetBtn.disabled=true;message('Sending password-reset email…');try{const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:'https://opeaa1234.github.io/nexora-play/account.html'});if(error)throw error;message('If an account exists for that email, a password-reset link will arrive shortly. Check your inbox and spam folder.')}catch(error){message(error.message||'Could not request a password reset right now. Please try again.')}finally{resetBtn.disabled=false}});
 function validUsername(value){return /^[A-Za-z0-9_]{3,24}$/.test(value)}
+let sessionRenderVersion=0;
 async function showSession(session){
- if(!session){authArea.classList.remove('hidden');signedIn.classList.add('hidden');return}
+ const renderVersion=++sessionRenderVersion;
+ if(!session){
+  authArea.classList.remove('hidden');signedIn.classList.add('hidden');
+  document.getElementById('playerEmail').textContent='';
+  document.getElementById('playerName').textContent='Player';
+  document.getElementById('displayNameInput').value='';
+  document.getElementById('avatarUrl').value='';
+  document.getElementById('avatarPreview').src='https://placehold.co/120x120/102b59/ffffff?text=NP';
+  document.getElementById('profileStatus').textContent='';
+  document.getElementById('personalBests').textContent='Sign in to view personal bests.';
+  return
+}
  authArea.classList.add('hidden');signedIn.classList.remove('hidden');
  document.getElementById('playerEmail').textContent=session.user.email||'Signed-in player';
  const fallback=(session.user.email||'Player').split('@')[0].replace(/[^A-Za-z0-9_]/g,'_').slice(0,24);
  let profileName=session.user.user_metadata?.username||fallback||'Player';
+ // Clear the previous account's profile immediately; a new user's profile query may take time or fail.
+ document.getElementById('playerName').textContent=profileName;
+ document.getElementById('displayNameInput').value='';
+ document.getElementById('avatarUrl').value='';
+ document.getElementById('avatarPreview').src='https://placehold.co/120x120/102b59/ffffff?text=NP';
+ document.getElementById('profileStatus').textContent='Loading player profile…';
+ document.getElementById('personalBests').textContent='Loading personal bests for this account…';
  const {data,error}=await supabase.from('player_profiles').select('username,display_name,avatar_url').eq('id',session.user.id).maybeSingle();
- if(error){document.getElementById('profileStatus').textContent='You are signed in, but we could not load your profile: '+error.message;document.getElementById('playerName').textContent=profileName;return}
+ if(renderVersion!==sessionRenderVersion)return;
+ if(error){document.getElementById('profileStatus').textContent='You are signed in, but we could not load your profile: '+error.message;document.getElementById('playerName').textContent=profileName;document.getElementById('personalBests').textContent='Personal bests are unavailable because this account profile could not be loaded.';return}
  if(data?.username){profileName=data.display_name||data.username;document.getElementById('displayNameInput').value=data.display_name||data.username;document.getElementById('avatarUrl').value=data.avatar_url||'';if(data.avatar_url)document.getElementById('avatarPreview').src=data.avatar_url}
  else {
   const candidate=validUsername(profileName)?profileName:('Player_'+session.user.id.slice(0,8));
   const {error:insertError}=await supabase.from('player_profiles').insert({id:session.user.id,username:candidate,display_name:candidate});
+  if(renderVersion!==sessionRenderVersion)return;
   if(insertError){document.getElementById('profileStatus').textContent='You are signed in, but your username could not be saved ('+insertError.message+'). We can fix this next.'}
   else {profileName=candidate;document.getElementById('displayNameInput').value=candidate;document.getElementById('profileStatus').textContent='Your player profile is ready.'}
  }
+ if(renderVersion!==sessionRenderVersion)return;
  document.getElementById('playerName').textContent=profileName;
- await loadPersonalBests(session.user.id);
+ await loadPersonalBests(session.user.id,renderVersion);
 }
-async function loadPersonalBests(userId){
+async function loadPersonalBests(userId,renderVersion){
  const target=document.getElementById('personalBests');
  if(!target)return;
  target.textContent='Loading personal bests…';
  const {data,error}=await supabase.from('player_best_scores').select('game_id,best_score,updated_at').eq('user_id',userId).order('best_score',{ascending:false});
+ if(renderVersion!==sessionRenderVersion)return;
  if(error){target.textContent='Scores will appear here once score saving is available.';console.error('Could not load personal bests:',error.message);return}
  if(!data||data.length===0){target.textContent='No saved scores yet. Play Space Defender while logged in to record your first personal best.';return}
  const names={'space-defender':'Space Defender'};
@@ -127,31 +152,37 @@ form.addEventListener('submit',async event=>{
  const email=document.getElementById('email').value.trim();
  const password=document.getElementById('password').value;
  try{
-  if(mode==='signup'){
+  if(mode==='recovery'){
+   const {error}=await supabase.auth.updateUser({password});
+   if(error)throw error;
+   await supabase.auth.signOut();
+   setMode('login');
+   message('Password updated successfully. Log in with your new password.');
+  }else if(mode==='signup'){
    const username=document.getElementById('username').value.trim();
    if(!validUsername(username)){message('Choose a username with 3–24 letters, numbers or underscores.');return}
    const {data,error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:'https://opeaa1234.github.io/nexora-play/account.html',data:{username}}});
    if(error)throw error;
-   if(data.session){message('Account created. Setting up your player profile…');await showSession(data.session)}
+   if(data.session){message('Account created. Setting up your player profile…')}
    else{message('Check your email for the confirmation link. Your chosen username is saved with your signup. After confirming, return here and log in.')}
   }else{
    const {data,error}=await supabase.auth.signInWithPassword({email,password});
    if(error)throw error;
-   await showSession(data.session);
   }
  }catch(error){message(error.message||'Something went wrong. Please try again.')}
  finally{submitBtn.disabled=false}
 });
 
-document.getElementById('avatarUrl').addEventListener('input',()=>{const url=document.getElementById('avatarUrl').value.trim();if(url)document.getElementById('avatarPreview').src=url});
+document.getElementById('avatarUrl').addEventListener('input',()=>{const url=document.getElementById('avatarUrl').value.trim();document.getElementById('avatarPreview').src=url||'https://placehold.co/120x120/102b59/ffffff?text=NP'});
 document.getElementById('avatarPreview').addEventListener('error',()=>{document.getElementById('avatarPreview').src='https://placehold.co/120x120/102b59/ffffff?text=NP'});
-document.getElementById('saveProfileBtn').addEventListener('click',async()=>{const btn=document.getElementById('saveProfileBtn');btn.disabled=true;const {data:{session}}=await supabase.auth.getSession();if(!session){document.getElementById('profileStatus').textContent='Please log in again to save profile details.';btn.disabled=false;return}const display_name=document.getElementById('displayNameInput').value.trim();const avatar_url=document.getElementById('avatarUrl').value.trim()||null;if(!display_name){document.getElementById('profileStatus').textContent='Please enter a display name.';btn.disabled=false;return}if(avatar_url){try{const u=new URL(avatar_url);if(!['https:','http:'].includes(u.protocol))throw Error()}catch{document.getElementById('profileStatus').textContent='Please enter a valid image URL starting with https://';btn.disabled=false;return}}const {error}=await supabase.from('player_profiles').update({display_name,avatar_url}).eq('id',session.user.id);document.getElementById('profileStatus').textContent=error?'Could not save profile: '+error.message:'Profile details saved!';if(!error)document.getElementById('playerName').textContent=display_name;btn.disabled=false});
+document.getElementById('saveProfileBtn').addEventListener('click',async()=>{const btn=document.getElementById('saveProfileBtn');const requestVersion=sessionRenderVersion;btn.disabled=true;try{const {data:{session}}=await supabase.auth.getSession();if(requestVersion!==sessionRenderVersion)return;if(!session){document.getElementById('profileStatus').textContent='Please log in again to save profile details.';return}const display_name=document.getElementById('displayNameInput').value.trim();const avatar_url=document.getElementById('avatarUrl').value.trim()||null;if(!display_name){document.getElementById('profileStatus').textContent='Please enter a display name.';return}if(avatar_url){try{const u=new URL(avatar_url);if(u.protocol!=='https:')throw Error()}catch{document.getElementById('profileStatus').textContent='Please enter a valid image URL starting with https://';return}}const {error}=await supabase.from('player_profiles').update({display_name,avatar_url}).eq('id',session.user.id);if(requestVersion!==sessionRenderVersion)return;document.getElementById('profileStatus').textContent=error?'Could not save profile: '+error.message:'Profile details saved!';if(!error)document.getElementById('playerName').textContent=display_name}catch(error){if(requestVersion===sessionRenderVersion)document.getElementById('profileStatus').textContent='Could not save profile: '+(error.message||'Please try again.')}finally{btn.disabled=false}});
 document.getElementById('logoutBtn').addEventListener('click',async()=>{
  const {error}=await supabase.auth.signOut();
  document.getElementById('profileStatus').textContent=error?error.message:'You have logged out.';
- if(!error)await showSession(null);
+ 
 });
-supabase.auth.onAuthStateChange((_event,session)=>{showSession(session)});
-const {data:{session}}=await supabase.auth.getSession();await showSession(session);
+const recoveryHash=new URLSearchParams(window.location.hash.slice(1)).get('type')==='recovery';
+supabase.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){setMode('recovery');authArea.classList.remove('hidden');signedIn.classList.add('hidden');message('Choose a new password to finish recovering your account.');return}if(event==='SIGNED_IN'||event==='SIGNED_OUT'){sessionRenderVersion++;setTimeout(()=>{void showSession(session)},0)}});
+const {data:{session}}=await supabase.auth.getSession();if(recoveryHash){setMode('recovery');authArea.classList.remove('hidden');signedIn.classList.add('hidden');message('Choose a new password to finish recovering your account.')}else await showSession(session);
 </script>
 </body></html>

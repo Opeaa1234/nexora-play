@@ -21,6 +21,7 @@ declare
   v_must_capture boolean := false;
   v_has_jump boolean := false;
   v_king boolean;
+  v_moving_king boolean;
   v_red boolean;
   v_dr integer;
   v_dc integer;
@@ -44,7 +45,13 @@ declare
   v_winner text := null;
 begin
   if v_user is null then raise exception 'Sign in to play.'; end if;
-  if p_from < 0 or p_from > 63 or p_to < 0 or p_to > 63 or p_from = p_to then
+  if p_room_code is null or p_room_code !~ '^[A-Za-z0-9]{6}$' then
+    raise exception 'Invalid room code.';
+  end if;
+  if p_from is null or p_to is null
+     or p_from < 0 or p_from > 63
+     or p_to < 0 or p_to > 63
+     or p_from = p_to then
     raise exception 'Invalid board square.';
   end if;
 
@@ -52,32 +59,48 @@ begin
    where public.game_rooms.room_code = upper(trim(p_room_code))
    for update;
   if not found then raise exception 'Room not found.'; end if;
-  if v_room.game_type <> 'draughts' then raise exception 'This room is not a Draughts room.'; end if;
-  if v_room.status <> 'playing' or v_room.guest_id is null then raise exception 'Waiting for the second player.'; end if;
+  if v_room.game_type is distinct from 'draughts' then raise exception 'This room is not a Draughts room.'; end if;
+  if v_room.status is distinct from 'playing' or v_room.guest_id is null then raise exception 'Waiting for the second player.'; end if;
   if v_user <> v_room.host_id and v_user <> v_room.guest_id then raise exception 'You are not a player in this room.'; end if;
 
   v_board := v_room.game_state->'board';
-  if coalesce(jsonb_typeof(v_board), 'null') <> 'array' or jsonb_array_length(v_board) <> 64 then
-    for idx in 0..63 loop
-      if ((idx / 8 + idx % 8) % 2) = 1 then
-        if idx / 8 < 3 then b[idx+1] := 'b';
-        elsif idx / 8 > 4 then b[idx+1] := 'r';
-        end if;
-      end if;
-    end loop;
-    v_turn := 'r';
-    v_forced := null;
-    v_moves := '[]'::jsonb;
-  else
-    for idx in 0..63 loop
-      if (v_board->idx) is not null and (v_board->idx) <> 'null'::jsonb then
-        b[idx+1] := v_board->>idx;
-      end if;
-    end loop;
-    v_turn := coalesce(v_room.game_state->>'turn','r');
-    v_forced := nullif(v_room.game_state->>'forced_from','')::integer;
-    v_moves := coalesce(v_room.game_state->'moves','[]'::jsonb);
+  if v_room.game_state is null or not (v_room.game_state ? 'board') then
+    -- A move RPC may only mutate an already initialized, playing room.
+    raise exception 'Saved Draughts board is missing.';
   end if;
+    if jsonb_typeof(v_board) is distinct from 'array' then
+      raise exception 'Saved Draughts board must be a JSON array.';
+    end if;
+    if jsonb_array_length(v_board) <> 64 then
+      raise exception 'Saved Draughts board must contain exactly 64 squares.';
+    end if;
+    for idx in 0..63 loop
+      if jsonb_typeof(v_board->idx) is distinct from 'null' then
+        v_piece := v_board->>idx;
+        if v_piece not in ('r','b','R','B') then
+          raise exception 'Saved Draughts board contains an invalid piece.';
+        end if;
+        b[idx+1] := v_piece;
+      end if;
+    end loop;
+    v_turn := v_room.game_state->>'turn';
+    if v_turn is distinct from 'r' and v_turn is distinct from 'b' then
+      raise exception 'Saved Draughts turn is invalid or missing.';
+    end if;
+    v_forced := nullif(v_room.game_state->>'forced_from','')::integer;
+    if v_forced is not null and v_forced not between 0 and 63 then
+      raise exception 'Saved Draughts continuation square is invalid.';
+    end if;
+    if v_forced is not null and (b[v_forced+1] is null or lower(b[v_forced+1]) <> v_turn) then
+      raise exception 'Saved Draughts continuation square does not contain the current player piece.';
+    end if;
+    if not (v_room.game_state ? 'moves') then
+      raise exception 'Saved Draughts move history is missing.';
+    end if;
+    v_moves := v_room.game_state->'moves';
+    if jsonb_typeof(v_moves) is distinct from 'array' then
+      raise exception 'Saved Draughts move history is invalid.';
+    end if;
 
   if (v_turn = 'r' and v_user <> v_room.host_id) or (v_turn = 'b' and v_user <> v_room.guest_id) then
     raise exception 'It is not your turn.';
@@ -89,6 +112,7 @@ begin
 
   v_red := v_turn = 'r';
   v_king := v_piece = upper(v_piece);
+  v_moving_king := v_king;
   v_r := p_from / 8; v_c := p_from % 8;
   v_tr := p_to / 8; v_tc := p_to % 8;
   if abs(v_tr-v_r) <> abs(v_tc-v_c) then raise exception 'Draughts pieces move diagonally.'; end if;
@@ -102,7 +126,7 @@ begin
     v_capture := v_mid;
   else
     for idx in 0..63 loop
-      if b[idx+1] is not null and lower(b[idx+1]) = v_turn then
+      if b[idx+1] is not null and lower(b[idx+1]) = v_turn and (v_forced is null or idx = v_forced) then
         rr := idx/8; cc := idx%8; v_king := b[idx+1] = upper(b[idx+1]);
         for dr in -1..1 loop
           for dc in -1..1 loop
@@ -121,15 +145,21 @@ begin
         end loop;
       end if;
     end loop;
+    v_king := v_moving_king;
+    if v_forced is not null and not v_must_capture then
+      raise exception 'Saved multi-jump state has no available continuation.';
+    end if;
     if v_must_capture then raise exception 'A capture is available and must be taken.'; end if;
   end if;
 
-  -- Restore the requested destination after scanning the board for compulsory captures.\n  v_tr := p_to / 8; v_tc := p_to % 8;\n  b[p_from+1] := null;
+  -- Restore the requested destination after scanning the board for compulsory captures.
+  v_tr := p_to / 8; v_tc := p_to % 8;
+  b[p_from+1] := null;
   if v_capture is not null then b[v_capture+1] := null; end if;
   if v_piece='r' and v_tr=0 then v_piece:='R'; elsif v_piece='b' and v_tr=7 then v_piece:='B'; end if;
   b[p_to+1] := v_piece;
 
-  if v_capture is not null and v_piece = lower(v_piece) then
+  if v_capture is not null and (v_king = true or v_piece = lower(v_piece)) then
     v_king := false;
     for dr in -1..1 loop
       for dc in -1..1 loop
@@ -151,10 +181,43 @@ begin
   end if;
 
   v_next_turn:=case when v_next_forced is not null then v_turn else case when v_turn='r' then 'b' else 'r' end end;
+
+  -- Finish the match when the next player has no pieces or legal move.
+  if v_next_forced is null then
+    v_any_move := false;
+    v_has_jump := false;
+    v_winner := null;
+    for idx in 0..63 loop
+      if b[idx+1] is not null and lower(b[idx+1]) = v_next_turn then
+        rr := idx/8; cc := idx%8;
+        v_king := b[idx+1] = upper(b[idx+1]);
+        for dr in -1..1 loop
+          for dc in -1..1 loop
+            if abs(dr)=1 and abs(dc)=1 and (v_king or (v_next_turn='r' and dr=-1) or (v_next_turn='b' and dr=1)) then
+              v_tr := rr+dr; v_tc := cc+dc;
+              if v_tr between 0 and 7 and v_tc between 0 and 7 then
+                if b[v_tr*8+v_tc+1] is null then
+                  v_any_move := true;
+                elsif lower(b[v_tr*8+v_tc+1]) <> v_next_turn then
+                  v_tr := v_tr+dr; v_tc := v_tc+dc;
+                  if v_tr between 0 and 7 and v_tc between 0 and 7 and b[v_tr*8+v_tc+1] is null then
+                    v_has_jump := true;
+                  end if;
+                end if;
+              end if;
+            end if;
+          end loop;
+        end loop;
+      end if;
+    end loop;
+    if v_has_jump then v_any_move := true; end if;
+    if not v_any_move then v_winner := v_turn; end if;
+  end if;
+
   v_moves:=v_moves||jsonb_build_array(jsonb_build_object('from',p_from,'to',p_to,'capture',v_capture));
-  v_new_state:=jsonb_build_object('version',1,'board',to_jsonb(b),'turn',v_next_turn,'forced_from',v_next_forced,'moves',v_moves);
-  update public.game_rooms set game_state=v_new_state,updated_at=now()
-   where id=v_room.id;
+  v_new_state:=jsonb_build_object('version',1,'board',to_jsonb(b),'turn',v_next_turn,'forced_from',v_next_forced,'moves',v_moves,'winner',v_winner);
+  update public.game_rooms set game_state=v_new_state,status=case when v_winner is not null then 'finished' else v_room.status end,updated_at=pg_catalog.now()
+   where id=v_room.id returning * into v_room;
   return query select v_room.room_code,v_new_state,v_room.status;
 end;
 $$;
