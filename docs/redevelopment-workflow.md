@@ -337,3 +337,12 @@ Append a dated entry below after each meaningful work cycle:
 - Validation: the intermediate source-only run failed as expected because the old static guard still required the previous error text ([run 40891643386](https://github.com/Opeaa1234/nexora-play/actions/runs/40891643386)); the guard was updated in the next commit. Verify the new push and PR runs before considering this fix validated. This is a static change; browser and two-player behavior remain **NOT TESTED** without isolated staging.
 - Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
 - Next action: confirm CI on the regression-guard commit and its ledger follow-up, then continue reviewing multiplayer state and sync paths. Do not merge until staging and real two-player Chess/Draughts browser tests pass.
+
+### 2026-10-29 — hide stale Chess position until refresh is verified
+
+- Finding: even after rejecting missing Chess history in all room states, a refresh that returned malformed history or a network error could leave the previously rendered board visible. That made stale state look current.
+- Change: the Chess page now clears its verified-state flag before each room refresh, shows an explicit unavailable-state placeholder, and renders the board again only after the saved move history has replayed successfully. Auth teardown also keeps the board in the unavailable state. Added a regression guard.
+- Commits: [Chess client](https://github.com/Opeaa1234/nexora-play/commit/7feb36650eace76582a085a3ad48c0c4a0fb9b8e), [regression guard correction](https://github.com/Opeaa1234/nexora-play/commit/85f31e46ffe95a38cadf8a7f455eb5afb5b18c5d).
+- Validation: an initial version of the new static guard had a JavaScript quoting error and failed CI; the guard was corrected. The corrected source/guard head passed both [push run 40892417942](https://github.com/Opeaa1234/nexora-play/actions/runs/40892417942) and [PR run 40892430166](https://github.com/Opeaa1234/nexora-play/actions/runs/40892430166). Deno type-check, 12 Chess validation tests, and project/security guardrails passed. Browser and two-player behavior remain **NOT TESTED** without isolated staging.
+- Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
+- Next action: verify CI on this ledger follow-up, then continue the multiplayer source audit. Do not merge until staging and real two-player Chess/Draughts browser tests pass.
