@@ -152,6 +152,7 @@ if (!draughtsHtml.includes("const channelAuthVersion=authVersion;channel=supabas
 
 
 const roomsHtml = pages.get("rooms.html")?.source ?? "";
+if (!roomsHtml.includes("crypto.getRandomValues(bytes)") || roomsHtml.includes("Math.random()")) fail("Room codes must use cryptographically secure randomness instead of Math.random");
 if (!roomsHtml.includes("data-open=") || !roomsHtml.includes("data-join=")) fail("Open rooms list must provide separate host-open and guest-join actions");
 if (!roomsHtml.includes(".or('is_public.eq.true,host_id.eq.'+requestedUser.id)")) fail("Room list must include the signed-in host's own private waiting rooms as well as public rooms");
 if (!roomsHtml.includes("multiplayer-draughts.html") || !roomsHtml.includes("multiplayer-chess.html")) fail("Room actions must route to the selected multiplayer game");
