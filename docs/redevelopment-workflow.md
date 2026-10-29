@@ -248,3 +248,12 @@ Append a dated entry below after each meaningful work cycle:
 - Checks: source, regression-guard, and ledger-head CI passed: [Chess source run 40873975462](https://github.com/Opeaa1234/nexora-play/actions/runs/40873975462), [Draughts push run 40873980999](https://github.com/Opeaa1234/nexora-play/actions/runs/40873980999), [Draughts PR run 40873986787](https://github.com/Opeaa1234/nexora-play/actions/runs/40873986787), [guard run 40874056825](https://github.com/Opeaa1234/nexora-play/actions/runs/40874056825), and [ledger push run 40874064080](https://github.com/Opeaa1234/nexora-play/actions/runs/40874064080) plus [PR run 40874074021](https://github.com/Opeaa1234/nexora-play/actions/runs/40874074021). Deno type-check, Chess validation tests, and static project/security guards passed. Auth-transition behavior during an in-flight move remains **NOT TESTED** without isolated staging and two authenticated users. The new documentation-only commit below needs its own CI confirmation.
 - Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
 - Next action: check push and PR Actions for this head, then continue the targeted source review and staging prerequisites.
+
+
+### 2026-10-29 — clear room codes on account transitions
+- Finding: the lobby correctly removed its room-list subscription and cleared the public-room list after sign-out, but the previously created-room panel and feedback text could remain visible. On a shared browser, that could leave an old private room code exposed after logout or an account switch.
+- Change: the lobby now clears the created-room panel and feedback whenever the authenticated user ID changes, including sign-out. Added a static regression guard.
+- Commits: lobby fix `e2cb61a275a75bbadf673697ae436141edaa79a7`; regression guard `5b3598d140999961bc56d7d669a75df7f0bb0427`.
+- Checks: CI pending for this new head; verify push and PR Actions before treating the static checks as passed. Shared-browser and auth behavior remain **NOT TESTED** without staging.
+- Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
+- Next action: verify CI, then continue the staging readiness checklist. Do not merge until isolated staging and two-player browser tests pass.
