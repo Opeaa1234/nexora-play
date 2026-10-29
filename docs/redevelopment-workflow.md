@@ -190,3 +190,11 @@ Append a dated entry below after each meaningful work cycle:
 - Commits: account guard and validator guard are recorded in the branch history; CI result pending at time of this note.
 - Validation: static source guard added. Wait for the branch's new GitHub Actions run before treating CI as passed. Browser-level auth races remain unverified until a separate staging Supabase environment is available.
 - Safety: no SQL, production Supabase settings, deployments, permissions, or live data were changed. PR #2 remains draft; do not merge until backend integration and two-player E2E tests pass.
+
+### 2026-10-29 — discard stale personal-best query results
+
+- Finding: the session-render guard still awaited `loadPersonalBests`, whose independent asynchronous query wrote to the dashboard without checking whether the account session had changed while the request was pending. A delayed score query could therefore overwrite the current user's dashboard after sign-out or a different sign-in.
+- Change: pass the active session-render version into `loadPersonalBests` and discard the query result if a newer session render has started. Added a validator regression guard covering both the version argument and post-query check.
+- Commits: account fix `5ca48802deac30511d4f6200ff8af30a4870945b`; validator guard `9dc1533906594c33c61ab23216b5ab3cdbe90df8`.
+- Validation: CI is running/pending for the new commits; update this entry after checking the latest workflow result. Browser-level race testing still requires isolated staging.
+- Safety: no production SQL, Supabase settings, permissions, deployments, or live data were changed. PR #2 remains draft pending staging and two-player E2E verification.
