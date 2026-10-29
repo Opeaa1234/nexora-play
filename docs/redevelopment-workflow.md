@@ -222,3 +222,12 @@ Append a dated entry below after each meaningful work cycle:
 - Change: introduced a separate auth-session generation counter. Chess and Draughts startup now checks it after each awaited session/room lookup and after initial sync before subscribing, and discards work belonging to an obsolete user session. Added static regression guards.
 - Checks: [push run 40872109850](https://github.com/Opeaa1234/nexora-play/actions/runs/40872109850) and [PR run 40872113632](https://github.com/Opeaa1234/nexora-play/actions/runs/40872113632) passed on commit `4f7e12b5f5881197e1127e004c7b816bd378280e`. Static validation passed Deno type-check, Chess move-validation tests, and page/multiplayer security guardrails. This does not replace live staging/browser verification.
 - Safety: no production SQL, Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft.
+
+
+### 2026-10-29 — discard stale room create/join results after auth changes
+- Finding: a room insert or secure join RPC could still be pending while the lobby's authenticated session changed. When the request resolved, the old action could display a created-room code or navigate the new account into a room joined by the previous account.
+- Change: room creation now captures the requesting user ID and session version, uses the captured host ID, and abandons UI follow-up if the session changes while the insert is in flight. Room joining similarly ignores stale RPC responses before displaying errors or navigating. Added static regression guards in `scripts/validate-project.mjs`.
+- Commits: [room lobby fix](https://github.com/Opeaa1234/nexora-play/commit/83d7404535678353065d2b407cf97600936f5790), [regression guards](https://github.com/Opeaa1234/nexora-play/commit/9e1fb0f7ef7d5131733dff528eafed9fcb68e4fe).
+- Checks: pending GitHub Actions for the latest branch head; browser race behavior remains **NOT TESTED** because a separate staging backend and two-user setup are not available.
+- Safety: an insert that already reached Supabase may still create a room for the original authenticated host, but stale UI results are discarded; no production SQL, Auth settings, permissions, deployments, or live data were intentionally changed. PR #2 remains draft and unmerged.
+- Next action: verify CI on the updated branch, then continue source review for remaining asynchronous auth/session races. Do not mark multiplayer release-ready until isolated staging and two-player browser tests pass.
