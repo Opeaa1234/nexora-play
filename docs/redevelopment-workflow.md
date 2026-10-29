@@ -388,3 +388,11 @@ Append a dated entry below after each meaningful work cycle:
 - No backend SQL or permissions were changed for this finding. Adding attempt accounting requires a reviewed migration and staged tests; do not apply or deploy it to the live backend as part of this source-only pass.
 - Follow-up: design and test a bounded per-user join-attempt limit in isolated staging, ensure legitimate retry behavior and concurrency remain correct, and review cleanup/retention of attempt records before any rollout.
 - Current safety status: room-code generation now uses `crypto.getRandomValues()` and the alphabet/unbiased mapping is guarded. CI for the code/guard and latest ledger commits is recorded above; this new documentation entry must also pass CI. PR #2 remains draft and unmerged.
+
+### 2026-10-29 — align join-code input with generated alphabet
+
+- Finding: room codes are generated from `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`, but the join form accepted any uppercase letter/digit. Characters deliberately excluded from generated codes (such as I, O, 0, and 1) could still be submitted to the join RPC and produce confusing “no room found” responses.
+- Change: input normalization now removes characters outside the generated alphabet, and validation requires exactly six allowed characters. Added a regression guard for the client-side normalization and format check.
+- Commits: [lobby fix](https://github.com/Opeaa1234/nexora-play/commit/163c2298293a8ef9659b8759baff0a435b8f6b83), [regression guard](https://github.com/Opeaa1234/nexora-play/commit/976a620020c13950ff273bf982fd5d5b4a485a1b).
+- Validation: source/guard CI is pending at the time of this ledger entry. This is input validation/UX, not a substitute for server-side abuse controls. No SQL, production Supabase settings, permissions, deployments, or live data changed.
+- Next action: verify push and PR CI for this change and the ledger, then continue review of multiplayer correctness. PR #2 remains draft and unmerged; isolated staging and two-player browser testing remain release blockers.
