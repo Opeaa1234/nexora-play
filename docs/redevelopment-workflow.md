@@ -208,3 +208,10 @@ Append a dated entry below after each meaningful work cycle:
 - Follow-up hardening: invalidate the session version synchronously inside the auth callback before deferring async work; guarded by validator commit `e4ee0b6a5fafa356479c29683e46d4d16e98d908` and `f31457541d20e18da6584743b9972c636f5afaa6`, with lobby adjustments `2239c135e2b5e2cafa1fb944465547fcc2e95621`. A CI run exposed that the older static guard still expected the original query variable name; the guard was updated to match the captured session user.
 - Checks: [GitHub Actions run 40870200855](https://github.com/Opeaa1234/nexora-play/actions/runs/40870200855) passed on commit `35a31a18d5af5dd495c3c54a8a57bdafb984ef2d`, including Deno type-check, all 12 Chess validation tests, and page/multiplayer security guardrails. CI for this follow-up ledger commit still needs confirmation.
 - Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. Real auth/realtime behavior remains untested until an isolated staging backend is available. PR #2 remains draft.
+
+### 2026-10-29 — clear multiplayer clients after auth changes
+
+- Finding: Chess and Draughts pages loaded the authenticated user once at startup but did not react to a later sign-out or account switch. Their old board and realtime subscription could remain visible after the session changed, and manual Draughts refresh could dereference a cleared room.
+- Change: both game clients now invalidate pending room reads, remove their realtime channel, clear the displayed game state, and prompt the player to sign in and reopen the room when the current user signs out or switches accounts. Draughts refresh safely returns when no room is active. Added static regression guards.
+- Status: source/validator changes committed; GitHub Actions must confirm the exact branch head. This does not substitute for staging tests with two authenticated users.
+- Safety: no production SQL, Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft pending isolated staging and multiplayer E2E verification.
