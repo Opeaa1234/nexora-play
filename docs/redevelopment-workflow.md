@@ -373,3 +373,11 @@ Append a dated entry below after each meaningful work cycle:
 - Validation: the source/guard head passed [push run 40895542530](https://github.com/Opeaa1234/nexora-play/actions/runs/40895542530) and [PR run 40895551567](https://github.com/Opeaa1234/nexora-play/actions/runs/40895551567). This remains static validation; isolated staging and two-player browser testing are still outstanding.
 - Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
 - Next action: verify CI on this ledger follow-up and continue reviewing lobby/session and multiplayer rules. Do not merge until isolated staging and real two-player Chess/Draughts tests pass.
+
+### 2026-10-29 — generate room codes with cryptographic randomness
+
+- Finding: the room lobby generated six-character join codes with `Math.random()`, which is not designed for security-sensitive identifiers. Codes are still six characters under the existing schema, so this change improves unpredictability but does not replace rate limiting or server-side access controls.
+- Change: room-code generation now uses `crypto.getRandomValues()`. The existing alphabet contains 32 characters, so mapping each random byte modulo 32 is unbiased. Added a regression guard that rejects a return to `Math.random()`.
+- Commits: [room lobby](https://github.com/Opeaa1234/nexora-play/commit/9fc7b92f5727b63931d4a89da56c1ccc88cb7a9e), [regression guard](https://github.com/Opeaa1234/nexora-play/commit/9e9e6381101873d8987b285b78af81cb6f89f253).
+- Validation: CI is running for the source/guard head; verify both push and PR checks before considering this change validated. No database schema, production SQL, Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
+- Next action: confirm CI, then review whether room-code joining has sufficient abuse/rate-limit protection. Do not change production backend policy or SQL without explicit approval; staging and real two-player tests remain release blockers.
