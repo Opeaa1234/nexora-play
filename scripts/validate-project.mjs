@@ -145,6 +145,7 @@ if (!roomsHtml.includes("data-open=") || !roomsHtml.includes("data-join=")) fail
 if (!roomsHtml.includes(".or('is_public.eq.true,host_id.eq.'+requestedUser.id)")) fail("Room list must include the signed-in host's own private waiting rooms as well as public rooms");
 if (!roomsHtml.includes("multiplayer-draughts.html") || !roomsHtml.includes("multiplayer-chess.html")) fail("Room actions must route to the selected multiplayer game");
 if (!roomsHtml.includes("function initialDraughtsState()")) fail("New Draughts rooms must persist a valid initial board before the guest joins");
+if (!roomsHtml.includes("const nextUser=session?.user||null;") || !roomsHtml.includes("$('createdRoom').innerHTML='';$('feedback').textContent=''")) fail("Room lobby must clear previous room details when signing out or switching accounts");
 if (!roomsHtml.includes("sessionVersion=0") || !roomsHtml.includes("if(version!==sessionVersion)return")) fail("Room lobby must invalidate stale asynchronous session and room-list work after auth transitions");
 if (!roomsHtml.includes("async function loadRooms(version=sessionVersion)") || !roomsHtml.includes("if(version!==sessionVersion||user?.id!==requestedUser.id)return")) fail("Room list responses must not overwrite the lobby after sign-out or account switching");
 if (!roomsHtml.includes("event==='SIGNED_IN'||event==='SIGNED_OUT'") || !roomsHtml.includes("supabase.removeChannel(channel);channel=null")) fail("Room lobby must react to session changes safely and release its realtime subscription on sign-out");
