@@ -427,3 +427,9 @@ Append a dated entry below after each meaningful work cycle:
 - Added explicit staging checks for the 10-attempt/10-minute per-account limit, rejected-attempt accounting, retry after window expiry, and private access to `room_join_rate_limits`.
 - This is a documentation-only correction. No Supabase database, settings, permissions, deployment, or live data changed. The migration remains unapplied; SQL execution and multiplayer browser testing still require isolated staging.
 - Validation: latest push and PR CI on the prior branch head passed Deno type-check, 12 Chess validation tests, and static page/multiplayer security guards. CI for these documentation commits must pass before the ledger records the final state as validated.
+
+
+## Latest production rollout note for room-join throttling — 2026-10-29
+- Follow-up review found the production rollout runbook did not yet mention the new room-join rate-limit migration. Added a guarded optional rollout step: first validate in isolated staging, compare the migration with the actual live function and dependencies, then coordinate the changed RPC return shape with the matching lobby frontend.
+- The migration remains unapplied. This documentation does not authorize production SQL changes; production remains untouched and rollout still requires explicit approval after staging sign-off.
+- Validation: the staging checklist correction and ledger update passed both push and PR CI on commit `074275be8cc87b472ce77c51097b3b9e159e7e56` (Deno type-check, Chess validation tests, and static project/security guards). CI for this latest runbook/ledger follow-up must also pass.
