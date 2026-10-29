@@ -266,3 +266,12 @@ Append a dated entry below after each meaningful work cycle:
 - Checks: source, regression guard, and ledger-head CI **PASSED**: [room-lobby source PR run 40875375513](https://github.com/Opeaa1234/nexora-play/actions/runs/40875375513), [guard push run 40875409469](https://github.com/Opeaa1234/nexora-play/actions/runs/40875409469), and latest-head [push run 40875436503](https://github.com/Opeaa1234/nexora-play/actions/runs/40875436503) plus [PR run 40875446598](https://github.com/Opeaa1234/nexora-play/actions/runs/40875446598). Static project/security checks, Deno type-check, and Chess validation tests passed. This is a source-level correction; rejected network requests during auth changes are **NOT TESTED** in browser. This ledger follow-up needs its own CI confirmation.
 - Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
 - Next action: verify push and PR Actions, then continue staging readiness and browser verification.
+
+
+### 2026-10-29 — catch rejected room-join requests
+- Finding: the lobby handled Supabase RPC errors returned as values, but an unexpectedly rejected `join_game_room` request could escape the async click handler and leave the player without a useful status message.
+- Change: catch rejected join requests and display the failure only if the captured auth generation and user ID are still current. Added a static regression guard.
+- Commits: lobby fix `11926418bee6304f34ca3e3576cd17b627bd9fd7`; guard `52e6cce22827ea66a834ce221f8306e340ee0e26`.
+- Checks: CI for this source/guard/ledger update is pending; browser behavior for rejected RPCs and auth transitions remains **NOT TESTED** without isolated staging.
+- Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
+- Next action: verify push and PR checks, then continue safe source review; do not merge until staging and two-player browser tests pass.
