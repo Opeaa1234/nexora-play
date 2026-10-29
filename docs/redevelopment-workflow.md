@@ -284,3 +284,11 @@ Append a dated entry below after each meaningful work cycle:
 - Checks: CI for the source/guard/ledger head is pending. Rejected lookup behavior and account transitions remain **NOT TESTED** in a real browser.
 - Safety: no SQL, production Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
 - Next action: verify CI and continue staging readiness; do not merge until isolated staging and two-player browser tests pass.
+
+
+## Latest multiplayer refresh error race guard — 2026-10-29
+- Follow-up source review found that realtime and manual refresh rejection handlers on Chess and Draughts could still replace current session feedback if an old refresh failed after sign-out/account switching.
+- Both pages now capture the auth generation for realtime subscriptions and manual refreshes, and display errors only while that generation remains current. Added static regression guards for both pages.
+- Commits: [Chess](https://github.com/Opeaa1234/nexora-play/commit/48cb61d32b323c6ca47fcff9de87bbc8d90f8142), [Draughts](https://github.com/Opeaa1234/nexora-play/commit/8aa6c9ae5b072880454d87f73c50c706f20d47ae), [validator](https://github.com/Opeaa1234/nexora-play/commit/6059ce5fc39a7ff6709f9350c655b7f7439cd431).
+- CI for the source/guard/ledger head is pending verification; actual auth transitions and rejected refreshes remain **NOT TESTED** in a real browser.
+- No production SQL, Supabase settings, permissions, deployments, or live data changed. PR #2 remains draft and unmerged.
