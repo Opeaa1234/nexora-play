@@ -127,6 +127,10 @@ if (!draughtsHtml.includes("if(!Array.isArray(saved.moves))throw Error('Saved Dr
 if (!draughtsHtml.includes("syncVersion=0") || !draughtsHtml.includes("if(request!==syncVersion)return")) fail("Live Draughts refreshes must ignore stale overlapping room reads");
 if (!chessHtml.includes("syncVersion=0") || !chessHtml.includes("if(request!==syncVersion)return")) fail("Live Chess refreshes must ignore stale overlapping room reads");
 
+if (!chessHtml.includes("supabase.auth.onAuthStateChange((event,session)=>{if(event!=='SIGNED_OUT'") || !chessHtml.includes("void supabase.removeChannel(channel);channel=null") || !chessHtml.includes("Your account session changed. Sign in again and reopen this room.")) fail("Live Chess must clear the board and realtime channel when the authenticated user signs out or switches accounts");
+if (!draughtsHtml.includes("supabase.auth.onAuthStateChange((event,session)=>{if(event!=='SIGNED_OUT'") || !draughtsHtml.includes("void supabase.removeChannel(channel);channel=null") || !draughtsHtml.includes("Your account session changed. Sign in again and reopen this room.")) fail("Live Draughts must clear the board and realtime channel when the authenticated user signs out or switches accounts");
+if (!draughtsHtml.includes("async function sync(){if(!room)return;const request=++syncVersion;")) fail("Live Draughts refresh must safely no-op after room/session teardown");
+
 const roomsHtml = pages.get("rooms.html")?.source ?? "";
 if (!roomsHtml.includes("data-open=") || !roomsHtml.includes("data-join=")) fail("Open rooms list must provide separate host-open and guest-join actions");
 if (!roomsHtml.includes(".or('is_public.eq.true,host_id.eq.'+requestedUser.id)")) fail("Room list must include the signed-in host's own private waiting rooms as well as public rooms");
