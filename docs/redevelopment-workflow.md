@@ -396,3 +396,11 @@ Append a dated entry below after each meaningful work cycle:
 - Commits: [lobby fix](https://github.com/Opeaa1234/nexora-play/commit/163c2298293a8ef9659b8759baff0a435b8f6b83), [regression guard](https://github.com/Opeaa1234/nexora-play/commit/976a620020c13950ff273bf982fd5d5b4a485a1b).
 - Validation: source/guard CI is pending at the time of this ledger entry. This is input validation/UX, not a substitute for server-side abuse controls. No SQL, production Supabase settings, permissions, deployments, or live data changed.
 - Next action: verify push and PR CI for this change and the ledger, then continue review of multiplayer correctness. PR #2 remains draft and unmerged; isolated staging and two-player browser testing remain release blockers.
+
+### 2026-10-29 — prevent duplicate in-flight room joins
+
+- Finding: repeated clicks on Join could send concurrent `join_game_room` RPCs from the same browser. The server-side row lock makes the room transition safe, but duplicate requests waste calls and can make the lobby feel unreliable on a slow connection.
+- Change: the join handler now uses a single-flight guard, disables the Join button during the request, and releases the guard in `finally` on success, failure, or an auth-transition early return. Added a regression guard for the lock and cleanup.
+- Commits: [lobby fix](https://github.com/Opeaa1234/nexora-play/commit/fe2b67071f02cd77f8425ffaf4f8447e1a8e3e91), [regression guard](https://github.com/Opeaa1234/nexora-play/commit/365443d9c58c5b06a9b63b6b2287fed8cd191ffa).
+- Validation: CI for the source/guard head and this ledger entry must pass before calling the change validated. This is client-side request de-duplication only, not server-side rate limiting. No SQL, production Supabase settings, permissions, deployments, or live data changed.
+- Next action: verify both push and PR CI, then continue review of multiplayer correctness and staged abuse controls. PR #2 remains draft and unmerged; isolated staging and real two-player tests remain release blockers.
