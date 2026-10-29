@@ -1,3 +1,5 @@
+begin;
+
 -- Nexora Play: per-user room-code guessing protection.
 -- Apply ONLY in an isolated staging Supabase project after secure-room-joining.sql.
 -- This file changes the join RPC return shape; deploy the matching rooms.html in the same release.
@@ -119,3 +121,5 @@ grant execute on function public.join_game_room(text) to authenticated;
 -- Operational note: the table retains only one rolling counter per account.
 -- Deleted accounts cascade-delete their rows. Old inactive rows may be pruned
 -- periodically in staging/operations after reviewing retention requirements.
+
+commit;
