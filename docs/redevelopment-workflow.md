@@ -404,3 +404,11 @@ Append a dated entry below after each meaningful work cycle:
 - Commits: [lobby fix](https://github.com/Opeaa1234/nexora-play/commit/fe2b67071f02cd77f8425ffaf4f8447e1a8e3e91), [regression guard](https://github.com/Opeaa1234/nexora-play/commit/365443d9c58c5b06a9b63b6b2287fed8cd191ffa).
 - Validation: the source/guard/ledger head passed [push run 40899485298](https://github.com/Opeaa1234/nexora-play/actions/runs/40899485298) and [PR run 40899496964](https://github.com/Opeaa1234/nexora-play/actions/runs/40899496964). This is client-side request de-duplication only, not server-side rate limiting. No SQL, production Supabase settings, permissions, deployments, or live data changed.
 - Next action: verify both push and PR CI, then continue review of multiplayer correctness and staged abuse controls. PR #2 remains draft and unmerged; isolated staging and real two-player tests remain release blockers.
+
+### 2026-10-29 — align direct multiplayer URL code validation
+
+- Finding: the lobby required the generated six-character alphabet, but both live board pages accepted any uppercase alphanumeric code in the URL. Direct links containing excluded characters could still trigger unnecessary database lookups and inconsistent validation.
+- Change: Chess and Draughts now validate URL codes against the same exact alphabet as the lobby. Added a regression guard covering both board pages.
+- Commits: [Chess](https://github.com/Opeaa1234/nexora-play/commit/d15eafdef7fe13bdc33679e29fd50b18f6548c39), [Draughts](https://github.com/Opeaa1234/nexora-play/commit/8b6181f9f4e697d2ac938ef6d99ed8e212004555), [regression guard](https://github.com/Opeaa1234/nexora-play/commit/fefb7dede7f2b44d1ad97efc7240bad1fb47f845).
+- Validation: source/guard and ledger CI must pass before this is considered validated. This aligns client-side validation only; server-side authorization and rate limiting remain necessary. No SQL, production Supabase settings, permissions, deployments, or live data changed.
+- Next action: verify push and PR CI, then continue staging and multiplayer correctness review. PR #2 remains draft and unmerged; isolated staging and real two-player tests remain release blockers.
