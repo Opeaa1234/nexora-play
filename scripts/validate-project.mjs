@@ -146,6 +146,8 @@ if (!roomsHtml.includes("event==='SIGNED_IN'||event==='SIGNED_OUT'") || !roomsHt
 if (!roomsHtml.includes("const version=++sessionVersion;setTimeout(()=>{void sessionCheck(session,version)")) fail("Room lobby must invalidate stale requests immediately before deferring auth-event handling");
 if (!roomsHtml.includes("if(version===sessionVersion)void loadRooms(version)")) fail("Room realtime callbacks must be ignored after their session subscription becomes stale");
 if (!roomsHtml.includes("gameType==='draughts'?initialDraughtsState():{version:1,stage:'waiting',moves:[]}")) fail("New rooms must initialize Draughts boards and Chess move histories before becoming active");
+if (!roomsHtml.includes("const requestVersion=sessionVersion,requestUserId=user.id;") || !roomsHtml.includes("host_id:requestUserId") || !roomsHtml.includes("if(requestVersion!==sessionVersion||user?.id!==requestUserId)return;if(!result.error)created=result.data;")) fail("Room creation must discard stale insert results after a sign-out or account switch");
+if (!roomsHtml.includes("const {data,error}=await supabase.rpc('join_game_room',{p_room_code:code});if(requestVersion!==sessionVersion||user?.id!==requestUserId)return;")) fail("Room joining must discard stale RPC results before showing errors or navigating after an auth transition");
 if (roomsHtml.includes("Room hosting and joining will be enabled after the database setup is completed.")) fail("Room lobby must not display a stale disabled-feature message after setup");
 
 const deployWorkflow = await readFile(path.join(root, ".github/workflows/deploy-staging-chess.yml"), "utf8").catch(() => "");
