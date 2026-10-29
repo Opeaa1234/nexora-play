@@ -16,8 +16,9 @@ Run these files from the repository root in Supabase SQL Editor, reviewing each 
 
 1. `supabase/game-rooms.sql`
 2. `supabase/secure-room-joining.sql`
-3. `supabase/live-chess-moves.sql`
-4. `supabase/live-draughts-moves.sql`
+3. `supabase/room-join-rate-limit.sql` (after reviewing the changed `join_game_room(text)` return shape)
+4. `supabase/live-chess-moves.sql`
+5. `supabase/live-draughts-moves.sql`
 
 Afterward verify:
 - [ ] `game_rooms` has RLS enabled.
@@ -87,6 +88,8 @@ Confirm the function has the standard Supabase environment variables `SUPABASE_U
 - [ ] Account A creates a public Draughts room; it appears in Account B's open-room list.
 - [ ] Private rooms do not appear in the public list but can be joined with the correct code.
 - [ ] Invalid and nonexistent codes show a useful error.
+- [ ] Repeated join attempts by one authenticated account are rate-limited (10 attempts per 10-minute window); verify rejected attempts count and that valid retries work after the window expires.
+- [ ] The `room_join_rate_limits` table has RLS enabled and no direct privileges for `anon` or `authenticated`.
 - [ ] A host cannot join their own room as a guest.
 - [ ] Two accounts attempting to join the same waiting room concurrently result in only one guest.
 - [ ] A third account cannot join a room that is already playing.
