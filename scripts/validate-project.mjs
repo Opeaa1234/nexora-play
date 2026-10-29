@@ -129,7 +129,7 @@ if (!chessHtml.includes("syncVersion=0") || !chessHtml.includes("if(request!==sy
 
 const roomsHtml = pages.get("rooms.html")?.source ?? "";
 if (!roomsHtml.includes("data-open=") || !roomsHtml.includes("data-join=")) fail("Open rooms list must provide separate host-open and guest-join actions");
-if (!roomsHtml.includes(".or('is_public.eq.true,host_id.eq.'+user.id)")) fail("Room list must include the signed-in host's own private waiting rooms as well as public rooms");
+if (!roomsHtml.includes(".or('is_public.eq.true,host_id.eq.'+requestedUser.id)")) fail("Room list must include the signed-in host's own private waiting rooms as well as public rooms");
 if (!roomsHtml.includes("multiplayer-draughts.html") || !roomsHtml.includes("multiplayer-chess.html")) fail("Room actions must route to the selected multiplayer game");
 if (!roomsHtml.includes("function initialDraughtsState()")) fail("New Draughts rooms must persist a valid initial board before the guest joins");
 if (!roomsHtml.includes("sessionVersion=0") || !roomsHtml.includes("if(version!==sessionVersion)return")) fail("Room lobby must invalidate stale asynchronous session and room-list work after auth transitions");
