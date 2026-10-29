@@ -154,6 +154,7 @@ if (!draughtsHtml.includes("const channelAuthVersion=authVersion;channel=supabas
 const roomsHtml = pages.get("rooms.html")?.source ?? "";
 if (!roomsHtml.includes("crypto.getRandomValues(bytes)") || roomsHtml.includes("Math.random()") || !roomsHtml.includes("const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'")) fail("Room codes must use cryptographically secure randomness and retain the 32-character alphabet required for unbiased byte mapping");
 if (!roomsHtml.includes("/^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/") || !roomsHtml.includes("replace(/[^ABCDEFGHJKLMNPQRSTUVWXYZ23456789]/g,'')")) fail("Room code entry must accept only the exact six-character alphabet generated for new rooms");
+if (!chessHtml.includes("!/^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/.test(code)") || !draughtsHtml.includes("!/^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/.test(code)")) fail("Live Chess and Draughts URLs must validate room codes against the same alphabet as the lobby");
 if (!roomsHtml.includes("data-open=") || !roomsHtml.includes("data-join=")) fail("Open rooms list must provide separate host-open and guest-join actions");
 if (!roomsHtml.includes(".or('is_public.eq.true,host_id.eq.'+requestedUser.id)")) fail("Room list must include the signed-in host's own private waiting rooms as well as public rooms");
 if (!roomsHtml.includes("multiplayer-draughts.html") || !roomsHtml.includes("multiplayer-chess.html")) fail("Room actions must route to the selected multiplayer game");
