@@ -231,3 +231,11 @@ Append a dated entry below after each meaningful work cycle:
 - Checks: [push run 40872754210](https://github.com/Opeaa1234/nexora-play/actions/runs/40872754210) and [PR run 40872763605](https://github.com/Opeaa1234/nexora-play/actions/runs/40872763605) **PASSED** on source/guard/ledger commit `d49f62aaa1ac297c937e5189c829925d615afa8b`; Deno type-check, Chess move-validation tests, and project/security guardrails passed. Browser race behavior remains **NOT TESTED** because a separate staging backend and two-user setup are not available.
 - Safety: an insert that already reached Supabase may still create a room for the original authenticated host, but stale UI results are discarded; no production SQL, Auth settings, permissions, deployments, or live data were intentionally changed. PR #2 remains draft and unmerged.
 - Next action: verify CI on the updated branch, then continue source review for remaining asynchronous auth/session races. Do not mark multiplayer release-ready until isolated staging and two-player browser tests pass.
+
+
+### 2026-10-29 — invalidate profile saves synchronously on auth transitions
+- Finding: account profile reads were version-guarded when their results returned, but the auth listener only scheduled the next render with `setTimeout`. That left a narrow event-loop window in which an old profile read or save could still update the UI after Supabase had already emitted sign-out/account-switch. The profile-save handler also lacked exception-safe button restoration.
+- Change: the auth listener now increments the session render generation synchronously before deferring UI rendering. Profile saves capture that generation, abandon stale session reads/write responses, report errors only for the still-current session, and always re-enable the save button in `finally`. Added static regression guards.
+- Commits: [account fix](https://github.com/Opeaa1234/nexora-play/commit/663a72b095587db744cee285581b482cf1b65228), [regression guards](https://github.com/Opeaa1234/nexora-play/commit/3a226b4f7a80920261619de296d81e3fecd51fa0).
+- Checks: pending GitHub Actions for this source/guard update; real auth behavior remains **NOT TESTED** in a browser because isolated staging is not available.
+- Safety: no production SQL, permissions, Auth settings, deployments, or live data changed. PR #2 remains draft and unmerged.
